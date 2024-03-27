@@ -1,40 +1,24 @@
-sealed interface xmlElement {
-    val name : String
-    val text : String?
-    val parent : xmlComposite?
+sealed interface XMLChild{
+    val value: String
+}
 
-    fun prettyPrint() : String {}
 
-    fun addAttribute() : Boolean {}
+data class Document(val encode: String, val value: String){
 
-    fun removeAttribute() : Boolean {}
-
-    fun modifyAttribute() : Boolean {}
+    var children: MutableList<XMLChild> = mutableListOf()
 
 }
 
-data class xmlComposite(
-    override val name: String,
-    override val text : String? = null,
-    override val parent : xmlComposite? = null
-) : xmlElement {
-    //private val children = mutableListOf<xmlElement>()
-    internal val children: MutableList<xmlElement> = mutableListOf()
+data class Tag(override val value: String):XMLChild{
 
-    init {
-        parent?.children?.add(this)
-    }
+    var children: MutableList<XMLChild> = mutableListOf()
 
 }
 
-data class xmlLeaf(
-    override val name: String,
-    override val text : String? = null,
-    override val parent : xmlComposite? = null
-) : xmlElement {
-    init {
-        parent?.children?.add(this)
-    }
+data class Atribute(var name: String, var value: String){
+
 }
 
-data class xmlAttribute() {}
+data class Text(override var value: String): XMLChild{
+
+}
