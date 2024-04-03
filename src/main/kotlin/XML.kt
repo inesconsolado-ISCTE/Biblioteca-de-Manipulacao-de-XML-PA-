@@ -13,9 +13,10 @@ data class Tag(override val value: String):XMLChild{
 
     var children: MutableList<XMLChild> = mutableListOf()
 
+    //associar uma lista de atributos à Tag?
 }
 
-data class Atribute(var name: String, var value: String){
+data class Attribute(var name: String, var value: String){
 
 }
 
