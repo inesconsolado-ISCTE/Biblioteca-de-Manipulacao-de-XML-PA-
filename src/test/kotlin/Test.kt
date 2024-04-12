@@ -26,6 +26,9 @@ class Test {
         fun addAttributeGlobally(){}
 
         @Test
+        fun renameAttributeGlobally(){}
+
+        @Test
         fun renameEntityGlobally(){}
 
         @Test

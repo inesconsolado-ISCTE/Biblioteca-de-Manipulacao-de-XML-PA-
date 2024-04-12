@@ -62,8 +62,13 @@ data class Document(val encode: String, val version: String): XMLParent{
     }
 
     //6. Add atributo globalmente e o resto
-    fun addAttribute(tag: Tag, name: String, value: String){
-
+    fun addAttributeGlobally(parent: String, name: String, value: String){
+        this.accept {
+            if((it is Tag) && it.value.equals(parent)) {
+                it.addAttribute(name, value)
+            }
+            false
+        }
     }
 
     //7.  renomeação de entidades globalmente ao documento (fornecendo nome antigo e nome novo)
@@ -76,11 +81,39 @@ data class Document(val encode: String, val version: String): XMLParent{
         }
     }
 
+    //8. renomeação de atributos
+    fun renameAttributeGlobally(parent: String, oldname: String, newname: String){
+        this.accept {
+            if((it is Tag) && it.value.equals(parent)) {
+                it.changeAttribute(oldname, newname)
+            }
+            false
+        }
+    }
+
+    //9. remoção de entidades globalmente ao documento
+    fun removeEntityGlobally(name: String){
+        this.accept {
+            if((it is Tag) && it.value.equals(name)) {
+                it.parent?.removeChild(it)
+            }
+            false
+        }
+    }
+
+    //10. remoçao de atributos globalmente ao documento
+    fun removeAttributeGlobally(parent: String, name: String){
+        this.accept {
+            if((it is Tag) && it.value.equals(parent)) {
+                it.removeAttribute(name)
+            }
+            false
+        }
+    }
+
     //4. prettyPrint: escrever tudo no ficheiro e pôr bonito
     fun prettyPrint(){
     }
-
-
 
 }
 
@@ -95,28 +128,29 @@ data class Tag(override var value: String, override val parent: Tag? = null): XM
 
     //2. Add, remover e alterar atributos em entidades
     //Podiamos usar ignoreCase = true
-    /*fun addAttribute(atr: Attribute) {
-        if (attributes.any { it.name.equals(atr.name) }) {  //verifica se já existe um atributo com este nome
-            //lançar excepção!! JÁ TEM ESSE NOME
+    fun addAttribute(name: String, value: String) {
+        val atr = Attribute(name, value)
+        if (attributes.any { it.name.equals(name) }) {  //verifica se já existe um atributo com este nome
+            throw IllegalArgumentException("Já existe um atributo associado a esta Tag com esse nome.")
         } else attributes.add(atr)
     }
 
-
-    //Usar o quê para procurar o atributo na lista? O nome? Então tem de ser único
-    fun removeAttribute(atr: Attribute) {
+    fun removeAttribute(name: String) {
+        val atr = attributes.find { it.name.equals(name) }
         attributes.remove(atr)
     }
 
-    fun changeAttribute(atr: Attribute, newvalue: String) {
-        val attrToChange = attributes.find { it.name.equals(atr.name) }
+    //isto antes recebia um atributo e um novo nome mas eu mudei para um nome antigo em vez de um objeto atributo, para se usar numa func do documento (e assim n tem de se criar o objeto para lhe acedermos?)
+    fun changeAttribute(oldname: String, newvalue: String) {
+        val attrToChange = attributes.find { it.name.equals(oldname) }
         if (attrToChange != null) {
             attrToChange.value = newvalue
         }
-    }*/
+    }
 }
     
 data class Attribute(var name: String, var value: String){
-
+//Já não sei qual é a utilidade desta classe
 }
 
 data class Text(override var value: String, override val parent: Tag? = null): XMLChild{
