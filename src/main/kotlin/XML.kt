@@ -23,9 +23,19 @@ sealed interface XMLParent{
     }
 
     fun addChild(child: XMLChild){
+        if(this.children.isNotEmpty()) { //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
+            this.children.forEach {
+                when (it) {
+                    is Text -> if(child is Tag)
+                        throw IllegalArgumentException("Não pode adicionar texto como filho se já houverem filhos tag.")
+                    is Tag -> if(child is Text)
+                        throw IllegalArgumentException("Não pode adicionar uma tag como filho se já houverem filhos texto.")
+                }
+            }
+        }
         children.add(child)
     }
-
+    
     fun removeChild(child: XMLChild) {
         children.remove(child)
         if (child is XMLParent) {
