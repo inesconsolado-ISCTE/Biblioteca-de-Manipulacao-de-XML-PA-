@@ -69,8 +69,7 @@ class Test {
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc codigo=\"M4310\">\n" +
-                        "    </fuc>\n" +
+                        "    <fuc codigo=\"M4310\"/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -142,8 +141,7 @@ class Test {
                 val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc codigo=\"M4310\">\n" +
-                        "    </fuc>\n" +
+                        "    <fuc codigo=\"M4310\"/>\n" +
                         "</plano>"
                 println("Antes de alterar o atributo:")
                 print(antes)
@@ -156,8 +154,7 @@ class Test {
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc codigo=\"666\">\n" +
-                        "    </fuc>\n" +
+                        "    <fuc codigo=\"666\"/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -185,14 +182,13 @@ class Test {
                 plano.addChild(fuc)
                 document.addAttributeGlobally("fuc", "codigo","M4310")
 
-                val fileName = "outputAddAttribute.xml"
+                val fileName = "outputAddAttributeGlobally.xml"
                 document.writeToFile(fileName)
 
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc codigo=\"M4310\">\n" +
-                        "    </fuc>\n" +
+                        "    <fuc codigo=\"M4310\"/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -222,14 +218,13 @@ class Test {
                 plano.addChild(fuc)
                 document.renameEntityGlobally("fuc", "fuc2")
 
-                val fileName = "outputAddAttribute.xml"
+                val fileName = "outputRenameEntityGlobally.xml"
                 document.writeToFile(fileName)
 
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc2>\n" +
-                        "    </fuc2>\n" +
+                        "    <fuc2/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -242,6 +237,7 @@ class Test {
 
         @Test
         fun removeEntityGlobally(){
+
                 val plano = Tag("plano")
                 document.addChild(plano)
 
@@ -249,10 +245,10 @@ class Test {
 
                 Text("Mestrado em Engenharia Informática",curso)
                 val fuc = Tag("fuc", plano)
-                println(plano.children)
+
                 document.removeEntityGlobally("fuc")
 
-                val fileName = "outputAddAttribute.xml"
+                val fileName = "outputRemoveEntityGlobally.xml"
                 document.writeToFile(fileName)
 
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -294,14 +290,13 @@ class Test {
 
                 document.removeAttributeGlobally("fuc","codigo")
 
-                val fileName = "outputRemoveAttribute.xml"
+                val fileName = "outputRemoveAttributeGlobally.xml"
                 document.writeToFile(fileName)
 
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc>\n" +
-                        "    </fuc>\n" +
+                        "    <fuc/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -310,11 +305,6 @@ class Test {
                 val actualXml = File(fileName).readText()
 
                 assertEquals(expectedXml, actualXml)
-        }
-
-        @Test
-        fun prettyPrint(){
-
         }
 
         //se houver tempo queria fazer testes para as excepções, para ver se não dá para fazer coisas ilegais

@@ -98,7 +98,7 @@ data class Document(val encode: String, val version: String): XMLParent{
     //9. remoção de entidades globalmente ao documento
     fun removeEntityGlobally(name: String){
         this.accept {
-            println(it)
+            //println(it)
             if((it is Tag) && it.value.equals(name)) {
                 it.parent?.removeChild(it)
                 return@accept false
@@ -141,22 +141,25 @@ data class Document(val encode: String, val version: String): XMLParent{
                     }
                     stringBuilder.deleteCharAt(stringBuilder.length - 1)
                 }
+                if (child.children.isEmpty()) {
+                    stringBuilder.append("/>\n")
+                } else {
+                    stringBuilder.append(">")
 
-                stringBuilder.append(">")
+                    val hasTextChild = child.children.any { it is Text }
+                    if (!hasTextChild) {
+                        stringBuilder.append("\n")
+                    }
+                    child.children.forEach { subChild ->
+                        prettyPrintLine(subChild, stringBuilder, level + 1, subChild is Text)
+                    }
 
-                val hasTextChild = child.children.any { it is Text }
-                if (!hasTextChild) {
-                    stringBuilder.append("\n")
+                    if (!isTextChild && hasTextChild) {
+                        stringBuilder.append("</${child.value}>\n")
+                    } else
+                        stringBuilder.append("$indent</${child.value}>\n")
+                    }
                 }
-                child.children.forEach {subChild ->
-                    prettyPrintLine(subChild, stringBuilder, level + 1, subChild is Text)
-                }
-
-                if (!isTextChild  && hasTextChild) {
-                    stringBuilder.append("</${child.value}>\n")
-                }else
-                    stringBuilder.append("$indent</${child.value}>\n")
-            }
             is Text -> {
                 stringBuilder.append(child.value.trim())
             }
