@@ -1,3 +1,5 @@
+import java.io.File
+
 //VAL É IMUTÁVEL
 //VAR É MUTÁVEL
 
@@ -57,9 +59,9 @@ data class Document(val encode: String, val version: String): XMLParent{
 
     override val children: MutableList<XMLChild> = mutableListOf()
 
-    init {
-        val xmlDeclarationText = "?xml version=\"$version\" encoding=\"$encode\"?"
-    }
+
+    val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
+
 
     //6. Add atributo globalmente e o resto
     fun addAttributeGlobally(parent: String, name: String, value: String){
@@ -112,15 +114,63 @@ data class Document(val encode: String, val version: String): XMLParent{
     }
 
     //4. prettyPrint: escrever tudo no ficheiro e pôr bonito
-    fun prettyPrint(){
+    // Add this function to your Document class
+    fun prettyPrint(): String {
+        return buildString {
+            append("$xmlDeclarationText\n")
+            children.forEach { child ->
+                prettyPrintLine(child, this, 0)
+            }
+        }.trimEnd()
     }
+
+    private fun prettyPrintLine(child: XMLChild, stringBuilder: StringBuilder, level: Int, isTextChild: Boolean = false) {
+        val indent = " ".repeat(level * 4)
+        when (child) {
+            is Tag -> {
+                stringBuilder.append("$indent<${child.value}")
+                if (child.attributes.isNotEmpty()) {
+                    stringBuilder.append(" ")
+                    child.attributes.forEach { attribute ->
+                        stringBuilder.append("${attribute.name}=\"${attribute.value}\" ")
+                    }
+                    stringBuilder.deleteCharAt(stringBuilder.length - 1)
+                }
+
+                stringBuilder.append(">")
+
+                val hasTextChild = child.children.any { it is Text }
+                if (!hasTextChild) {
+                    stringBuilder.append("\n")
+                }
+                child.children.forEach {subChild ->
+                    prettyPrintLine(subChild, stringBuilder, level + 1, subChild is Text)
+                }
+
+                if (!isTextChild  && hasTextChild) {
+                    stringBuilder.append("</${child.value}>\n")
+                }else
+                    stringBuilder.append("$indent</${child.value}>\n")
+            }
+            is Text -> {
+                stringBuilder.append(child.value.trim())
+            }
+        }
+    }
+
+
+    fun writeToFile(fileName: String) {
+        val content = prettyPrint()
+        File(fileName).writeText(content)
+    }
+
 
 }
 
 data class Tag(override var value: String, override val parent: Tag? = null): XMLChild, XMLParent {
     //com val em vez de var não se pode mudar a lista toda pô-la toda a null, mas pode se fazer alterações na mesma pq é mutable
     override val children: MutableList<XMLChild> = mutableListOf()
-    private val attributes: MutableList<Attribute> = mutableListOf()
+    val attributes: MutableList<Attribute> = mutableListOf()
 
     init {
         parent?.children?.add(this)
@@ -136,19 +186,19 @@ data class Tag(override var value: String, override val parent: Tag? = null): XM
     }
 
     fun removeAttribute(name: String) {
-        val atr = attributes.find { it.name.equals(name) }
+        val atr = attributes.find { it.name == name }
         attributes.remove(atr)
     }
 
     //isto antes recebia um atributo e um novo nome mas eu mudei para um nome antigo em vez de um objeto atributo, para se usar numa func do documento (e assim n tem de se criar o objeto para lhe acedermos?)
-    fun changeAttribute(oldname: String, newvalue: String) {
-        val attrToChange = attributes.find { it.name.equals(oldname) }
+    fun changeAttribute(givenName: String, newvalue: String) {
+        val attrToChange = attributes.find { it.name.equals(givenName) }
         if (attrToChange != null) {
             attrToChange.value = newvalue
         }
     }
 }
-    
+
 data class Attribute(var name: String, var value: String){
 //Já não sei qual é a utilidade desta classe
 }
