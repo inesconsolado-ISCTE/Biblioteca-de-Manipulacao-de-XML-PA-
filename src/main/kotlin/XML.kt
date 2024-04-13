@@ -17,7 +17,8 @@ sealed interface XMLParent{
      */
     fun accept(visitor: (XMLParent) -> Boolean){
         if (visitor(this)) {
-            this.children.forEach {
+            val childrenCopy = ArrayList(this.children)  //estava a dar um erro relativo a iterar uma lista e modificá-la ao mesmo tempo portanto agora estamos a iterar uma cópia e a modificar o original
+            childrenCopy.forEach {
                 if(it is XMLParent)  //sem este if teriamos de ter uma função accept tbm no XMLChild
                     it.accept(visitor)
             }
@@ -50,9 +51,7 @@ sealed interface XMLParent{
 }
 
 /*Notinhas:
-- DUVIDA: Onde é que escrevemos as coisas no xml em si? Tipo com as < > e isso tudo
 - só pode haver uma root tag
-- Deviamos verificar se um child pode ou não ser adicionado: se já ouver text não podemos acrescentar uma tag como child
 */
 
 data class Document(val encode: String, val version: String): XMLParent{
@@ -60,7 +59,7 @@ data class Document(val encode: String, val version: String): XMLParent{
     override val children: MutableList<XMLChild> = mutableListOf()
 
 
-    val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
+    private val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
 
 
     //6. Add atributo globalmente e o resto
@@ -68,8 +67,9 @@ data class Document(val encode: String, val version: String): XMLParent{
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
                 it.addAttribute(name, value)
+                return@accept false
             }
-            false
+            true
         }
     }
 
@@ -77,9 +77,10 @@ data class Document(val encode: String, val version: String): XMLParent{
     fun renameEntityGlobally(oldname: String, newname: String){
         this.accept {
             if((it is Tag) && it.value.equals(oldname)) {
-                    it.value = newname
-                }
-            false
+                it.value = newname
+                return@accept false
+            }
+            true
         }
     }
 
@@ -88,18 +89,21 @@ data class Document(val encode: String, val version: String): XMLParent{
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
                 it.changeAttribute(oldname, newname)
+                return@accept false
             }
-            false
+            true
         }
     }
 
     //9. remoção de entidades globalmente ao documento
     fun removeEntityGlobally(name: String){
         this.accept {
+            println(it)
             if((it is Tag) && it.value.equals(name)) {
                 it.parent?.removeChild(it)
+                return@accept false
             }
-            false
+            true
         }
     }
 
@@ -108,8 +112,9 @@ data class Document(val encode: String, val version: String): XMLParent{
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
                 it.removeAttribute(name)
+                return@accept false
             }
-            false
+            true
         }
     }
 
@@ -173,6 +178,19 @@ data class Tag(override var value: String, override val parent: Tag? = null): XM
     val attributes: MutableList<Attribute> = mutableListOf()
 
     init {
+        fun addChild(child: XMLChild){
+            if(this.children.isNotEmpty()) { //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
+                this.children.forEach {
+                    when (it) {
+                        is Text -> if(child is Tag)
+                            throw IllegalArgumentException("Não pode adicionar texto como filho se já houverem filhos tag.")
+                        is Tag -> if(child is Text)
+                            throw IllegalArgumentException("Não pode adicionar uma tag como filho se já houverem filhos texto.")
+                    }
+                }
+            }
+            children.add(child)
+        }
         parent?.children?.add(this)
     }
 
