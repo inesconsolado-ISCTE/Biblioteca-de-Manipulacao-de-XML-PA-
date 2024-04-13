@@ -144,9 +144,9 @@ class Test {
                         "    <fuc codigo=\"M4310\"/>\n" +
                         "</plano>"
                 println("Antes de alterar o atributo:")
-                print(antes)
+                println(antes)
 
-                fuc.changeAttribute("codigo","666")
+                fuc.changeAttribute("codigo","codigos","1234")
 
                 val fileName = "outputChangeAttribute.xml"
                 document.writeToFile(fileName)
@@ -154,7 +154,7 @@ class Test {
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc codigo=\"666\"/>\n" +
+                        "    <fuc codigos=\"1234\"/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -201,6 +201,44 @@ class Test {
 
         @Test
         fun renameAttributeGlobally(){
+                val plano = Tag("plano")
+                document.addChild(plano)
+
+                val curso = Tag("curso")
+                plano.addChild(curso)
+
+                Text("Mestrado em Engenharia Informática",curso)
+
+                val fuc = Tag("fuc")
+
+                fuc.addAttribute("codigo","M4310")
+                plano.addChild(fuc)
+
+                val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<plano>\n" +
+                        "    <curso>Mestrado em Engenharia Informática</curso>\n" +
+                        "    <fuc codigo=\"M4310\"/>\n" +
+                        "</plano>"
+                println("Antes de alterar o atributo:")
+                println(antes)
+
+                document.renameAttributeGlobally("fuc","codigo","codigos","1234")
+
+                val fileName = "outputRenameAttributeGlobally.xml"
+                document.writeToFile(fileName)
+
+                val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<plano>\n" +
+                        "    <curso>Mestrado em Engenharia Informática</curso>\n" +
+                        "    <fuc codigos=\"1234\"/>\n" +
+                        "</plano>"
+
+                println("Resultado expectado")
+                println(expectedXml)
+
+                val actualXml = File(fileName).readText()
+
+                assertEquals(expectedXml, actualXml)
 
         }
 

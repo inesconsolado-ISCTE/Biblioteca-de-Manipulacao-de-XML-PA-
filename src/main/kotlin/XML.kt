@@ -85,10 +85,10 @@ data class Document(val encode: String, val version: String): XMLParent{
     }
 
     //8. renomeação de atributos
-    fun renameAttributeGlobally(parent: String, oldname: String, newname: String){
+    fun renameAttributeGlobally(parent: String, oldname: String, newname: String,newValue: String? = null){
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
-                it.changeAttribute(oldname, newname)
+                it.changeAttribute(oldname, newname,newValue)
                 return@accept false
             }
             true
@@ -212,12 +212,16 @@ data class Tag(override var value: String, override val parent: Tag? = null): XM
     }
 
     //isto antes recebia um atributo e um novo nome mas eu mudei para um nome antigo em vez de um objeto atributo, para se usar numa func do documento (e assim n tem de se criar o objeto para lhe acedermos?)
-    fun changeAttribute(givenName: String, newvalue: String) {
+    fun changeAttribute(givenName: String, newname: String, newValue: String? = null) {
         val attrToChange = attributes.find { it.name.equals(givenName) }
         if (attrToChange != null) {
-            attrToChange.value = newvalue
+            attrToChange.name = newname
+            if (newValue != null) {
+                attrToChange.value = newValue
+            }
         }
     }
+
 }
 
 data class Attribute(var name: String, var value: String){
