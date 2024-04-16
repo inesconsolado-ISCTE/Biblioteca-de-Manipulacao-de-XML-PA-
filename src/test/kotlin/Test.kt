@@ -13,11 +13,12 @@ class Test {
         @Test
         fun addEntity() {
                 val plano = Tag("plano", document)
+                //println(document.children)
 
                 val fileName = "outputAddEntity.xml"
                 document.writeToFile(fileName)
 
-                val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<plano>\n</plano>"
+                val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<plano/>"
                 println("Resultado expectado")
                 println(expectedXml)
 

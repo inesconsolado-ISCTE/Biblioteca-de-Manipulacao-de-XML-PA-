@@ -26,16 +26,18 @@ sealed interface XMLParent{
     }
 
      fun addChild(child: XMLChild){
-        if(this.children.isNotEmpty()) //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
+        if(this.children.isNotEmpty()) { //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
             this.children.forEach {
                 when (it) {
-                    is Text -> if(child is Tag)
+                    is Text -> if (child is Tag)
                         throw IllegalArgumentException("Não pode adicionar texto como filho se já houverem filhos tag.")
-                    is Tag -> if(child is Text)
+
+                    is Tag -> if (child is Text)
                         throw IllegalArgumentException("Não pode adicionar uma tag como filho se já houverem filhos texto.")
                 }
             }
-        this.children.add(child)
+        }
+        children.add(child)
     }
     
     fun removeChild(child: XMLChild) {
@@ -58,17 +60,20 @@ data class Document(val encode: String, val version: String): XMLParent{
 
     override val children: MutableList<XMLChild> = mutableListOf()
 
-    private lateinit var rootTag: Tag
+    //private var rootTag: Tag
 
     private val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
 
-    fun setRootTag(root: Tag){
+    /*fun setRootTag(root: Tag){
         rootTag = root
     }
 
     fun getRootTag(): Tag{
         return rootTag
     }
+
+     */
+
 
     //6. Add atributo globalmente e o resto
     fun addAttributeGlobally(parent: String, name: String, value: String){
@@ -189,7 +194,6 @@ data class Tag(override var value: String, override val parent: XMLParent): XMLC
 
     init {
         parent.addChild(this)
-        parent.children.add(this)
     }
 
     fun getAttributes(): List<Attribute>{
@@ -230,6 +234,5 @@ data class Attribute(var name: String, var value: String){
 data class Text(override var value: String, override val parent: Tag): XMLChild{
     init {
         parent.addChild(this)
-        parent.children.add(this)
     }
 }
