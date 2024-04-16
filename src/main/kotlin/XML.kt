@@ -5,7 +5,7 @@ import java.io.File
 
 sealed interface XMLChild{
     val value: String
-    val parent: XMLParent?
+    val parent: XMLParent
 }
 
 sealed interface XMLParent{
@@ -25,8 +25,8 @@ sealed interface XMLParent{
         }
     }
 
-    fun addChild(child: XMLChild){
-        if(this.children.isNotEmpty()) { //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
+     fun addChild(child: XMLChild){
+        if(this.children.isNotEmpty()) //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
             this.children.forEach {
                 when (it) {
                     is Text -> if(child is Tag)
@@ -35,8 +35,7 @@ sealed interface XMLParent{
                         throw IllegalArgumentException("Não pode adicionar uma tag como filho se já houverem filhos texto.")
                 }
             }
-        }
-        children.add(child)
+        this.children.add(child)
     }
     
     fun removeChild(child: XMLChild) {
@@ -52,15 +51,24 @@ sealed interface XMLParent{
 
 /*Notinhas:
 - só pode haver uma root tag
+- é melhor separar tudo em ficheiros diferentes, em termos de "bom design"? Se sim, tiramos o sealed das interfaces
 */
 
 data class Document(val encode: String, val version: String): XMLParent{
 
     override val children: MutableList<XMLChild> = mutableListOf()
 
+    private lateinit var rootTag: Tag
 
     private val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
 
+    fun setRootTag(root: Tag){
+        rootTag = root
+    }
+
+    fun getRootTag(): Tag{
+        return rootTag
+    }
 
     //6. Add atributo globalmente e o resto
     fun addAttributeGlobally(parent: String, name: String, value: String){
@@ -119,7 +127,6 @@ data class Document(val encode: String, val version: String): XMLParent{
     }
 
     //4. prettyPrint: escrever tudo no ficheiro e pôr bonito
-    // Add this function to your Document class
     fun prettyPrint(): String {
         return buildString {
             append("$xmlDeclarationText\n")
@@ -134,9 +141,9 @@ data class Document(val encode: String, val version: String): XMLParent{
         when (child) {
             is Tag -> {
                 stringBuilder.append("$indent<${child.value}")
-                if (child.attributes.isNotEmpty()) {
+                if (child.getAttributes().isNotEmpty()) {
                     stringBuilder.append(" ")
-                    child.attributes.forEach { attribute ->
+                    child.getAttributes().forEach { attribute ->
                         stringBuilder.append("${attribute.name}=\"${attribute.value}\" ")
                     }
                     stringBuilder.deleteCharAt(stringBuilder.length - 1)
@@ -175,26 +182,18 @@ data class Document(val encode: String, val version: String): XMLParent{
 
 }
 
-data class Tag(override var value: String, override val parent: Tag? = null): XMLChild, XMLParent {
-    //com val em vez de var não se pode mudar a lista toda pô-la toda a null, mas pode se fazer alterações na mesma pq é mutable
+data class Tag(override var value: String, override val parent: XMLParent): XMLChild, XMLParent {
+
     override val children: MutableList<XMLChild> = mutableListOf()
-    val attributes: MutableList<Attribute> = mutableListOf()
+    private val attributes: MutableList<Attribute> = mutableListOf()
 
     init {
-        fun addChild(child: XMLChild){
-            if(this.children.isNotEmpty()) { //se a tag tiver filhos temos de verificar o que são para deixar ou não acrescentar mais
-                this.children.forEach {
-                    when (it) {
-                        is Text -> if(child is Tag)
-                            throw IllegalArgumentException("Não pode adicionar texto como filho se já houverem filhos tag.")
-                        is Tag -> if(child is Text)
-                            throw IllegalArgumentException("Não pode adicionar uma tag como filho se já houverem filhos texto.")
-                    }
-                }
-            }
-            children.add(child)
-        }
-        parent?.children?.add(this)
+        parent.addChild(this)
+        parent.children.add(this)
+    }
+
+    fun getAttributes(): List<Attribute>{
+        return attributes
     }
 
     //2. Add, remover e alterar atributos em entidades
@@ -228,8 +227,9 @@ data class Attribute(var name: String, var value: String){
 //Já não sei qual é a utilidade desta classe
 }
 
-data class Text(override var value: String, override val parent: Tag? = null): XMLChild{
+data class Text(override var value: String, override val parent: Tag): XMLChild{
     init {
-        parent?.children?.add(this)
+        parent.addChild(this)
+        parent.children.add(this)
     }
 }

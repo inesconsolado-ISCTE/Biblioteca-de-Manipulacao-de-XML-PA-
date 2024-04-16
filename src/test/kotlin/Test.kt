@@ -11,9 +11,8 @@ class Test {
         val document = Document("UTF-8", "1.0")
 
         @Test
-        fun addEntity(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun addEntity() {
+                val plano = Tag("plano", document)
 
                 val fileName = "outputAddEntity.xml"
                 document.writeToFile(fileName)
@@ -28,9 +27,8 @@ class Test {
         }
 
         @Test
-        fun removeEntity(){
-                val teste = Tag("apagar")
-                document.addChild(teste)
+        fun removeEntity() {
+                val teste = Tag("apagar", document)
 
                 println("Com tag por apagar:")
                 println(document.prettyPrint())
@@ -50,18 +48,15 @@ class Test {
         }
 
         @Test
-        fun addAttribute(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun addAttribute() {
+                val plano = Tag("plano", document)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                val curso = Tag("curso", plano)
 
-                Text("Mestrado em Engenharia Informática",curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                val fuc = Tag("fuc")
-                fuc.addAttribute("codigo","M4310")
-                plano.addChild(fuc)
+                val fuc = Tag("fuc", plano)
+                fuc.addAttribute("codigo", "M4310")
 
                 val fileName = "outputAddAttribute.xml"
                 document.writeToFile(fileName)
@@ -82,18 +77,14 @@ class Test {
         }
 
         @Test
-        fun removeAttribute(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun removeAttribute() {
+                val plano = Tag("plano", document)
+                val curso = Tag("curso", plano)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                Text("Mestrado em Engenharia Informática",curso)
-
-                val fuc = Tag("fuc")
-                fuc.addAttribute("codigo","M4310")
-                plano.addChild(fuc)
+                val fuc = Tag("fuc", plano)
+                fuc.addAttribute("codigo", "M4310")
 
                 val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
@@ -125,18 +116,14 @@ class Test {
         }
 
         @Test
-        fun changeAttribute(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun changeAttribute() {
+                val plano = Tag("plano", document)
+                val curso = Tag("curso", plano)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                Text("Mestrado em Engenharia Informática",curso)
-
-                val fuc = Tag("fuc")
-                fuc.addAttribute("codigo","M4310")
-                plano.addChild(fuc)
+                val fuc = Tag("fuc", plano)
+                fuc.addAttribute("codigo", "M4310")
 
                 val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
@@ -146,7 +133,7 @@ class Test {
                 println("Antes de alterar o atributo:")
                 println(antes)
 
-                fuc.changeAttribute("codigo","codigos","1234")
+                fuc.changeAttribute("codigo", "codigos", "1234")
 
                 val fileName = "outputChangeAttribute.xml"
                 document.writeToFile(fileName)
@@ -169,18 +156,25 @@ class Test {
         //aceder a uma entidade é suposto ter uma função de teste? Se calhar devolver a lista dos seus filhos
 
         @Test
-        fun addAttributeGlobally(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun accessEntityParent(){
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+        }
 
-                Text("Mestrado em Engenharia Informática",curso)
+        @Test
+        fun accessEntityChildren(){
 
-                val fuc = Tag("fuc")
-                plano.addChild(fuc)
-                document.addAttributeGlobally("fuc", "codigo","M4310")
+        }
+
+        @Test
+        fun addAttributeGlobally() {
+                val plano = Tag("plano", document)
+
+                val curso = Tag("curso", plano)
+
+                Text("Mestrado em Engenharia Informática", curso)
+
+                val fuc = Tag("fuc", plano)
+                document.addAttributeGlobally("fuc", "codigo", "M4310")
 
                 val fileName = "outputAddAttributeGlobally.xml"
                 document.writeToFile(fileName)
@@ -200,19 +194,16 @@ class Test {
         }
 
         @Test
-        fun renameAttributeGlobally(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun renameAttributeGlobally() {
+                val plano = Tag("plano", document)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                val curso = Tag("curso", plano)
 
-                Text("Mestrado em Engenharia Informática",curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                val fuc = Tag("fuc")
+                val fuc = Tag("fuc", plano)
 
-                fuc.addAttribute("codigo","M4310")
-                plano.addChild(fuc)
+                fuc.addAttribute("codigo", "M4310")
 
                 val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
@@ -222,7 +213,7 @@ class Test {
                 println("Antes de alterar o atributo:")
                 println(antes)
 
-                document.renameAttributeGlobally("fuc","codigo","codigos","1234")
+                document.renameAttributeGlobally("fuc", "codigo", "codigos", "1234")
 
                 val fileName = "outputRenameAttributeGlobally.xml"
                 document.writeToFile(fileName)
@@ -243,17 +234,14 @@ class Test {
         }
 
         @Test
-        fun renameEntityGlobally(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun renameEntityGlobally() {
+                val plano = Tag("plano", document)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                val curso = Tag("curso", plano)
 
-                Text("Mestrado em Engenharia Informática",curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                val fuc = Tag("fuc")
-                plano.addChild(fuc)
+                val fuc = Tag("fuc", plano)
                 document.renameEntityGlobally("fuc", "fuc2")
 
                 val fileName = "outputRenameEntityGlobally.xml"
@@ -274,14 +262,12 @@ class Test {
         }
 
         @Test
-        fun removeEntityGlobally(){
-
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun removeEntityGlobally() {
+                val plano = Tag("plano", document)
 
                 val curso = Tag("curso", plano)
 
-                Text("Mestrado em Engenharia Informática",curso)
+                Text("Mestrado em Engenharia Informática", curso)
                 val fuc = Tag("fuc", plano)
 
                 document.removeEntityGlobally("fuc")
@@ -304,18 +290,15 @@ class Test {
         }
 
         @Test
-        fun removeAttributeGlobally(){
-                val plano = Tag("plano")
-                document.addChild(plano)
+        fun removeAttributeGlobally() {
+                val plano = Tag("plano", document)
 
-                val curso = Tag("curso")
-                plano.addChild(curso)
+                val curso = Tag("curso", plano)
 
-                Text("Mestrado em Engenharia Informática",curso)
+                Text("Mestrado em Engenharia Informática", curso)
 
-                val fuc = Tag("fuc")
-                fuc.addAttribute("codigo","M4310")
-                plano.addChild(fuc)
+                val fuc = Tag("fuc", plano)
+                fuc.addAttribute("codigo", "M4310")
 
                 val antes = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
@@ -326,7 +309,7 @@ class Test {
                 println("Antes de apagar o atributo:")
                 print(antes)
 
-                document.removeAttributeGlobally("fuc","codigo")
+                document.removeAttributeGlobally("fuc", "codigo")
 
                 val fileName = "outputRemoveAttributeGlobally.xml"
                 document.writeToFile(fileName)
@@ -344,8 +327,5 @@ class Test {
 
                 assertEquals(expectedXml, actualXml)
         }
-
-        //se houver tempo queria fazer testes para as excepções, para ver se não dá para fazer coisas ilegais
-
 
 }
