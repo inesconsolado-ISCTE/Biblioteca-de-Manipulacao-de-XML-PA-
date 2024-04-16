@@ -74,6 +74,30 @@ data class Document(val encode: String, val version: String): XMLParent{
 
      */
 
+    fun XPath(parent: XMLParent, xpath: String): List<Tag> {
+        val elements = mutableListOf<Tag>()
+
+        val tags = xpath.split("/")
+
+        var currentParent: XMLParent = parent
+        for (tagName in tags) {
+            if (currentParent !is Tag) {
+                return emptyList()
+            }
+
+            val currentTag = currentParent.children.filterIsInstance<Tag>().find { it.value == tagName }
+            if (currentTag != null) {
+                elements.add(currentTag)
+                currentParent = currentTag
+            } else {
+                return emptyList()
+            }
+        }
+
+        return elements
+    }
+
+
 
     //6. Add atributo globalmente e o resto
     fun addAttributeGlobally(parent: String, name: String, value: String){

@@ -328,5 +328,76 @@ class Test {
 
                 assertEquals(expectedXml, actualXml)
         }
+        @Test
+        fun testPrettyPrint() {
+                // Criar a estrutura XML conforme o exemplo fornecido
+                val documento = Document("UTF-8", "1.0")
+                val plano = Tag("plano", documento)
+                val curso = Tag("curso", plano)
+                curso.addChild(Text("Mestrado em Engenharia Informática", curso))
+                val fuc1 = Tag("fuc", plano)
+                fuc1.addAttribute("codigo", "M4310")
+                val nome1 = Tag("nome", fuc1)
+                nome1.addChild(Text("Programação Avançada", nome1))
+                val ects1 = Tag("ects", fuc1)
+                ects1.addChild(Text("6.0", ects1))
+                val avaliacao1 = Tag("avaliacao", fuc1)
+                val componente1 = Tag("componente", avaliacao1)
+                componente1.addAttribute("nome", "Quizzes")
+                componente1.addAttribute("peso", "20%")
+                val componente2 = Tag("componente", avaliacao1)
+                componente2.addAttribute("nome", "Projeto")
+                componente2.addAttribute("peso", "80%")
+                plano.addChild(curso)
+                plano.addChild(fuc1)
 
+                val fuc2 = Tag("fuc", plano)
+                fuc2.addAttribute("codigo", "03782")
+                val nome2 = Tag("nome", fuc2)
+                nome2.addChild(Text("Dissertação", nome2))
+                val ects2 = Tag("ects", fuc2)
+                ects2.addChild(Text("42.0", ects2))
+                val avaliacao2 = Tag("avaliacao", fuc2)
+                val componente3 = Tag("componente", avaliacao2)
+                componente3.addAttribute("nome", "Dissertação")
+                componente3.addAttribute("peso", "60%")
+                val componente4 = Tag("componente", avaliacao2)
+                componente4.addAttribute("nome", "Apresentação")
+                componente4.addAttribute("peso", "20%")
+                val componente5 = Tag("componente", avaliacao2)
+                componente5.addAttribute("nome", "Discussão")
+                componente5.addAttribute("peso", "20%")
+                plano.addChild(fuc2)
+
+                // Chamar o método prettyPrint para obter a representação formatada do XML
+                val xmlFormatado = documento.prettyPrint()
+
+                // XML esperado conforme o exemplo fornecido
+                val xmlEsperado = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <plano>
+                <curso>Mestrado em Engenharia Informática</curso>
+                <fuc codigo="M4310">
+                    <nome>Programação Avançada</nome>
+                    <ects>6.0</ects>
+                    <avaliacao>
+                        <componente nome="Quizzes" peso="20%"/>
+                        <componente nome="Projeto" peso="80%"/>
+                    </avaliacao>
+                </fuc>
+                <fuc codigo="03782">
+                    <nome>Dissertação</nome>
+                    <ects>42.0</ects>
+                    <avaliacao>
+                        <componente nome="Dissertação" peso="60%"/>
+                        <componente nome="Apresentação" peso="20%"/>
+                        <componente nome="Discussão" peso="20%"/>
+                    </avaliacao>
+                </fuc>
+            </plano>
+        """.trimIndent()
+
+                // Verificar se o XML formatado coincide com o XML esperado
+                assertEquals(xmlEsperado, xmlFormatado)
+        }
 }
