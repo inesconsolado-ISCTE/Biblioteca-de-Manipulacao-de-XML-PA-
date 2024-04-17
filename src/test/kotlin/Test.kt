@@ -104,8 +104,7 @@ class Test {
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
                         "    <curso>Mestrado em Engenharia Informática</curso>\n" +
-                        "    <fuc>\n" +
-                        "    </fuc>\n" +
+                        "    <fuc/>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
@@ -397,7 +396,7 @@ class Test {
 
 
                 val resultadoXPath = documento.microXPath("plano/fuc/avaliacao/componente")
-
+                println(resultadoXPath)
                 // Verificar se os elementos encontrados correspondem aos esperados
                 assertEquals(5, resultadoXPath.size)
                 assertEquals("Quizzes", resultadoXPath[0].value)
