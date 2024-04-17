@@ -74,24 +74,15 @@ data class Document(val encode: String, val version: String): XMLParent{
 
      */
 
-    fun XPath(parent: XMLParent, xpath: String): List<Tag> {
-        val elements = mutableListOf<Tag>()
+    fun microXPath(xpath: String): List<Tag> {
 
+        val elements = mutableListOf<Tag>()
         val tags = xpath.split("/")
 
-        var currentParent: XMLParent = parent
-        for (tagName in tags) {
-            if (currentParent !is Tag) {
-                return emptyList()
-            }
+        var currentParent: XMLParent = this
 
-            val currentTag = currentParent.children.filterIsInstance<Tag>().find { it.value == tagName }
-            if (currentTag != null) {
-                elements.add(currentTag)
-                currentParent = currentTag
-            } else {
-                return emptyList()
-            }
+        for (tagName in tags) {
+            //logica...
         }
 
         return elements

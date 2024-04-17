@@ -333,14 +333,16 @@ class Test {
                 // Criar a estrutura XML conforme o exemplo fornecido
                 val documento = Document("UTF-8", "1.0")
                 val plano = Tag("plano", documento)
+
                 val curso = Tag("curso", plano)
-                curso.addChild(Text("Mestrado em Engenharia Informática", curso))
+                Text("Mestrado em Engenharia Informática", curso)
+
                 val fuc1 = Tag("fuc", plano)
                 fuc1.addAttribute("codigo", "M4310")
                 val nome1 = Tag("nome", fuc1)
-                nome1.addChild(Text("Programação Avançada", nome1))
+                Text("Programação Avançada", nome1)
                 val ects1 = Tag("ects", fuc1)
-                ects1.addChild(Text("6.0", ects1))
+                Text("6.0", ects1)
                 val avaliacao1 = Tag("avaliacao", fuc1)
                 val componente1 = Tag("componente", avaliacao1)
                 componente1.addAttribute("nome", "Quizzes")
@@ -348,15 +350,13 @@ class Test {
                 val componente2 = Tag("componente", avaliacao1)
                 componente2.addAttribute("nome", "Projeto")
                 componente2.addAttribute("peso", "80%")
-                plano.addChild(curso)
-                plano.addChild(fuc1)
 
                 val fuc2 = Tag("fuc", plano)
                 fuc2.addAttribute("codigo", "03782")
                 val nome2 = Tag("nome", fuc2)
-                nome2.addChild(Text("Dissertação", nome2))
+                Text("Dissertação", nome2)
                 val ects2 = Tag("ects", fuc2)
-                ects2.addChild(Text("42.0", ects2))
+                Text("42.0", ects2)
                 val avaliacao2 = Tag("avaliacao", fuc2)
                 val componente3 = Tag("componente", avaliacao2)
                 componente3.addAttribute("nome", "Dissertação")
@@ -367,12 +367,9 @@ class Test {
                 val componente5 = Tag("componente", avaliacao2)
                 componente5.addAttribute("nome", "Discussão")
                 componente5.addAttribute("peso", "20%")
-                plano.addChild(fuc2)
 
-                // Chamar o método prettyPrint para obter a representação formatada do XML
                 val xmlFormatado = documento.prettyPrint()
 
-                // XML esperado conforme o exemplo fornecido
                 val xmlEsperado = """
             <?xml version="1.0" encoding="UTF-8"?>
             <plano>
@@ -396,8 +393,17 @@ class Test {
                 </fuc>
             </plano>
         """.trimIndent()
-
-                // Verificar se o XML formatado coincide com o XML esperado
                 assertEquals(xmlEsperado, xmlFormatado)
+
+
+                val resultadoXPath = documento.microXPath("plano/fuc/avaliacao/componente")
+
+                // Verificar se os elementos encontrados correspondem aos esperados
+                assertEquals(5, resultadoXPath.size)
+                assertEquals("Quizzes", resultadoXPath[0].value)
+                assertEquals("Projeto", resultadoXPath[1].value)
+                assertEquals("Dissertação", resultadoXPath[2].value)
+                assertEquals("Apresentação", resultadoXPath[3].value)
+                assertEquals("Discussão", resultadoXPath[4].value)
         }
 }
