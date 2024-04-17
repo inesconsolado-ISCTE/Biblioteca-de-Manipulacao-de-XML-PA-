@@ -73,12 +73,12 @@ data class Document(val encode: String, val version: String): XMLParent{
 
      */
 
-    fun microXPath(xpath: String): MutableList<XMLChild> {
+    fun microXPath(xpath: String): String {
 
-        val elements = mutableListOf<XMLChild>()
+        val elements = mutableListOf<Tag>()
         val tags = xpath.split("/")
-        println(tags)
-        println(tags[0])
+        //println(tags)
+        //println(tags[0])
 
         //assumindo que o string que passam começa na tag root
         val firstTag = this.children.find { it.value == tags[0] && it is Tag}
@@ -94,29 +94,33 @@ data class Document(val encode: String, val version: String): XMLParent{
                 }
             }
         }
-        return elements
+
+        val stringBuilder = java.lang.StringBuilder()
+        for (tag in elements) {
+            printTag(tag, stringBuilder, false, "", 0)
+        }
+        return stringBuilder.toString().trimEnd()
     }
 
-    private fun helper(tag: XMLParent, tags: List<String>, index: Int, elements: MutableList<XMLChild>) {
+    private fun helper(tag: XMLParent, tags: List<String>, index: Int, elements: MutableList<Tag>) {
         var currentParent: XMLParent = tag
-        println("estou no helper")
-        val foundTags = mutableListOf<XMLChild>()
+        //println("estou no helper")
+        val foundTags = mutableListOf<Tag>()
         currentParent.children.forEach{
-            println(it)
-            println(tags[index])
-            if(it.value == tags[index] && it is XMLParent){
+            //println(it)
+            //println(tags[index])
+            if(it.value == tags[index] && it is Tag){
                 if(index != tags.size-1) {
-                    println(index)
+                    //println(index)
                     currentParent = it
                     helper(currentParent, tags, index + 1, elements)
                 }
                 else {
-                    println("encontrei: $it")
+                    //println("encontrei: $it")
                     foundTags.add(it)
                 }
             }
         }
-        println("aqui estão:$foundTags")
         elements.addAll(foundTags)
     }
 
@@ -188,38 +192,43 @@ data class Document(val encode: String, val version: String): XMLParent{
         }.trimEnd()
     }
 
-    private fun prettyPrintLine(child: XMLChild, stringBuilder: StringBuilder, level: Int, isTextChild: Boolean = false) {
+
+    fun printTag(child: Tag, stringBuilder: StringBuilder, isTextChild: Boolean, indent: String, level: Int ){
+
+        stringBuilder.append("$indent<${child.value}")
+        if (child.getAttributes().isNotEmpty()) {
+            stringBuilder.append(" ")
+            child.getAttributes().forEach { attribute ->
+                stringBuilder.append("${attribute.name}=\"${attribute.value}\" ")
+            }
+            stringBuilder.deleteCharAt(stringBuilder.length - 1)
+        }
+        if (child.children.isEmpty()) {
+            stringBuilder.append("/>\n")
+        } else {
+            stringBuilder.append(">")
+
+            val hasTextChild = child.children.any { it is Text }
+            if (!hasTextChild) {
+                stringBuilder.append("\n")
+            }
+            child.children.forEach { subChild ->
+                prettyPrintLine(subChild, stringBuilder, level + 1, subChild is Text)
+            }
+
+            if (!isTextChild && hasTextChild) {
+                stringBuilder.append("</${child.value}>\n")
+            } else
+                stringBuilder.append("$indent</${child.value}>\n")
+        }
+    }
+
+    fun prettyPrintLine(child: XMLChild, stringBuilder: StringBuilder, level: Int, isTextChild: Boolean = false) {
         val indent = " ".repeat(level * 4)
         when (child) {
             is Tag -> {
-                stringBuilder.append("$indent<${child.value}")
-                if (child.getAttributes().isNotEmpty()) {
-                    stringBuilder.append(" ")
-                    child.getAttributes().forEach { attribute ->
-                        stringBuilder.append("${attribute.name}=\"${attribute.value}\" ")
-                    }
-                    stringBuilder.deleteCharAt(stringBuilder.length - 1)
-                }
-                if (child.children.isEmpty()) {
-                    stringBuilder.append("/>\n")
-                } else {
-                    stringBuilder.append(">")
-
-                    val hasTextChild = child.children.any { it is Text }
-                    if (!hasTextChild) {
-                        stringBuilder.append("\n")
-                    }
-                    child.children.forEach { subChild ->
-                        prettyPrintLine(subChild, stringBuilder, level + 1, subChild is Text)
-                    }
-
-                    if (!isTextChild && hasTextChild) {
-                        stringBuilder.append("</${child.value}>\n")
-                    } else
-                        stringBuilder.append("$indent</${child.value}>\n")
-                    }
-                }
-            is Text -> {
+                printTag(child,stringBuilder,isTextChild,indent,level)
+            }is Text -> {
                 stringBuilder.append(child.value.trim())
             }
         }
