@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.lang.StringBuilder
 
 class Test {
 
@@ -396,13 +397,16 @@ class Test {
 
 
                 val resultadoXPath = documento.microXPath("plano/fuc/avaliacao/componente")
-                println(resultadoXPath)
-                // Verificar se os elementos encontrados correspondem aos esperados
-                assertEquals(5, resultadoXPath.size)
-                assertEquals("Quizzes", resultadoXPath[0].value)
-                assertEquals("Projeto", resultadoXPath[1].value)
-                assertEquals("Dissertação", resultadoXPath[2].value)
-                assertEquals("Apresentação", resultadoXPath[3].value)
-                assertEquals("Discussão", resultadoXPath[4].value)
+
+                val resultadoXPathesperado = """
+                        <componente nome="Quizzes" peso="20%"/>
+                        <componente nome="Projeto" peso="80%"/>
+                        <componente nome="Dissertação" peso="60%"/>
+                        <componente nome="Apresentação" peso="20%"/>
+                        <componente nome="Discussão" peso="20%"/>
+                """.trimIndent()
+
+                assertEquals(resultadoXPath,resultadoXPathesperado)
+
         }
 }
