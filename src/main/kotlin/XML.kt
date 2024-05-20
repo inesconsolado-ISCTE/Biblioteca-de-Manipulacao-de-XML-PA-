@@ -1,12 +1,10 @@
-import java.io.File
-
 //VAL É IMUTÁVEL
 //VAR É MUTÁVEL
 
 
 sealed interface XMLChild{
     val value: String
-    val parent: Tag
+    val parent: Tag?
 }
 
 sealed interface ReceivesVisitor{
@@ -32,13 +30,18 @@ sealed interface ReceivesVisitor{
 */
 
 
-data class Tag(override var value: String, override val parent: Tag): XMLChild, ReceivesVisitor {
+data class Tag(override var value: String,private val document: Document, override val parent: Tag?=null ) : XMLChild, ReceivesVisitor {
 
     private val children: MutableList<XMLChild> = mutableListOf()
     private val attributes: MutableList<Attribute> = mutableListOf()
 
     init {
-        parent.addChild(this)
+
+        if (parent == null) {
+            document.setRootTag(this)
+        } else {
+            parent.addChild(this)
+        }
     }
 
     override fun getChildrenOfTag(): List<XMLChild> {
