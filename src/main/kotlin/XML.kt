@@ -30,7 +30,7 @@ sealed interface ReceivesVisitor{
 */
 
 
-data class Tag(override var value: String,private val document: Document, override val parent: Tag?=null ) : XMLChild, ReceivesVisitor {
+data class Tag(override var value: String, private val document: Document, override val parent: Tag?=null ) : XMLChild, ReceivesVisitor {
 
     private val children: MutableList<XMLChild> = mutableListOf()
     private val attributes: MutableList<Attribute> = mutableListOf()
