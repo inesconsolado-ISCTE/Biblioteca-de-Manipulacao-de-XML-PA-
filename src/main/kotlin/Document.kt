@@ -1,6 +1,6 @@
 import java.io.File
 
-data class Document(val encode: String, val version: String): ReceivesVisitor{
+data class Document(val encode: String, val version: String, val name: String): ReceivesVisitor{
 
     //override val children: MutableList<XMLChild> = mutableListOf()
 
@@ -9,15 +9,27 @@ data class Document(val encode: String, val version: String): ReceivesVisitor{
     private val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
 
     fun setRootTag(root: Tag){
-
         if (::rootTag.isInitialized) {
+            println(::rootTag.isInitialized)
+            println(getRootTag())
             throw IllegalStateException("A tag root já foi definida para este documento.")
             }
         rootTag = root
     }
 
     fun getRootTag(): Tag{
+        if (!::rootTag.isInitialized) {
+            throw IllegalStateException("A tag root já foi definida para este documento.")
+        }
         return rootTag
+    }
+
+    fun isRootTagInitialized(): Boolean {
+        return ::rootTag.isInitialized
+    }
+
+    fun getDocName(): String{
+        return name
     }
 
     override fun getChildrenOfTag(): List<XMLChild> {

@@ -8,7 +8,7 @@ class Test {
         //tecnicamente não é um ficheiro temporário porque nao apago depois de usar mas dps n dava para confirmar
         //as teorias do porque nao estar a funcionar, quando revermos isto em conjunto meto para apagar mas por
         //enquanto deixamos os ficheiros xml para confirmar as coisas
-        val document = Document("UTF-8", "1.0")
+        val document = Document("UTF-8", "1.0", "exemplo")
 
         @Test
         fun addEntity() {

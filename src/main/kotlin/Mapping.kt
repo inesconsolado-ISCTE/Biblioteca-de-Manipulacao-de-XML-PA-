@@ -1,3 +1,4 @@
+import java.io.File
 import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
@@ -9,8 +10,8 @@ class Mapping {
     private lateinit var document: Document
 
     private lateinit var createdClass: Any  //objeto que dão para criar uma classe e vai ser a tag parent ao lidar com esta classe
-    fun setDocument(encode: String, version: String){
-        val doc = Document(encode, version)
+
+    private fun setDocument(doc: Document){
         this.document = doc
     }
 
@@ -35,14 +36,27 @@ class Mapping {
     @Target(AnnotationTarget.PROPERTY)
     annotation class XmlText  //Child de uma tag que só tem text
 
+    private val KClass<*>.getTextField: List<KProperty<*>>
+        get() {
+            return declaredMemberProperties.filter { property ->
+                property.annotations.any { it is XmlText }
+            }
+        }
 
-    //Obter parâmetros pela ordem
-    private val KClass<*>.classFields: List<KProperty<*>>
+    private val KClass<*>.getAttrFields: List<KProperty<*>>
+        get() {
+            return declaredMemberProperties.filter { property ->
+                property.annotations.any { it is XmlAttribute }
+            }
+        }
+
+    val KClass<*>.classFields: List<KProperty<*>>
         get() {
             return primaryConstructor!!.parameters.map { p ->
                 declaredMemberProperties.find { it.name == p.name }!!
             }
         }
+
 
     //fazer função para obter parâmetros que são atributos
     private fun getAttribute(kp: KProperty<*>): Attribute?{
@@ -65,8 +79,9 @@ class Mapping {
     private fun getTagText(clazz: KClass<*>, parent: Tag, kp: KProperty<*>): Tag?{
         var tag: Tag? = null
         if(kp.hasAnnotation<XmlTagText>()) {
-                tag = tagWithText(clazz, parent, kp)
-            }
+            val value = kp.findAnnotation<XmlTagText>()!!.value
+            tag = tagWithText(clazz, value, parent, kp)
+        }
         return tag
     }
 
@@ -74,7 +89,7 @@ class Mapping {
     private fun getTagEmpty(clazz: KClass<*>, parent: Tag, kp: KProperty<*>): Tag?{
         var tag: Tag? = null
         if(kp.hasAnnotation<XmlTag>() && !kp.hasAnnotation<HasTagChildren>()) {
-                val value = clazz.findAnnotation<XmlTag>()!!.value
+                val value = kp.findAnnotation<XmlTag>()!!.value
                 tag = Tag(value, document, parent)
             }
         return tag
@@ -87,43 +102,57 @@ class Mapping {
 
     //fazer função para obter parâmetros que é texto
     //temos de garantir que se for uma tag com texto TEM APENAS ESSE TEXTO NA CLASSFIELDS
+    //Adiciona texto posteriormente
     private fun setText(clazz: KClass<*>, tag: Tag, fieldText: KProperty<*>): Text{
         val value = fieldText.getter.call(createdClass) as String
         return Text(value, tag) //torna a tag parent deste text
     }
 
-
-    //nesta função ler o nome da classe e os parametros dados e criar tags e atributos e texto?
-    //esta função devolve coisas para os testes -> Ainda não funciona para escrever num documento
-    fun createClass(futureTag: Any): Array<Any>? {
-        createdClass = futureTag
-        val clazz = createdClass::class
-        val annotations = clazz.annotations
-        //tipo de anotação da classe e age consoante isso
-        var output: Array<Any>? = null
-        annotations.forEach{
-            when(it) {
-                is XmlTag -> complexTag(clazz)
-                is XmlTagText -> tagWithText(clazz, tag, clazz.classFields[0])
-            }
-        }
-        return output
-    }
-
-    private fun tagWithText(clazz: KClass<*>, parent: Tag, field: KProperty<*>): Tag {
-        val value = clazz.findAnnotation<XmlTagText>()!!.value
+    private fun tagWithText(clazz: KClass<*>, value: String, parent: Tag?, field: KProperty<*>): Tag {
         val tagWithTextChild = Tag(value, document, parent)
         val text = setText(clazz, tagWithTextChild, field)
         return tagWithTextChild
     }
 
+
+    //nesta função ler o nome da classe e os parametros dados e criar tags e atributos e texto?
+    //esta função devolve coisas para os testes -> Ainda não funciona para escrever num documento
+    fun createClass(futureTag: Any, parent: Tag?, doc: Document): String {
+        setDocument(doc)
+        createdClass = futureTag
+        val clazz = createdClass::class
+        val annotations = clazz.annotations
+        //tipo de anotação da classe e age consoante isso
+
+        if (parent == null && doc.isRootTagInitialized()) {
+            throw IllegalStateException("A root tag já foi definida para este documento.")
+        }
+
+        // Criar a nova tag
+        annotations.forEach { annotation ->
+            when (annotation) {
+                is XmlTag -> complexTag(clazz, parent)
+                is XmlTagText -> tagText(clazz, parent)
+            }
+        }
+        return writeInDoc()
+    }
+
+    private fun tagText(clazz: KClass<*>, parent: Tag?) {
+        val value = clazz.findAnnotation<XmlTagText>()!!.value
+        val newtag = tagWithText(clazz, value, parent, clazz.getTextField[0])
+        if(clazz.getAttrFields.isNotEmpty()){
+            clazz.getAttrFields.forEach {setAttribute(it, newtag)}
+        }
+    }
+
     //ainda só funciona caso tenha atributos mas não sei se funciona caso tenha outras tags
-    private fun complexTag(clazz: KClass<*>){
+    private fun complexTag(clazz: KClass<*>, parent: Tag?): Tag{
         val value = clazz.findAnnotation<XmlTag>()!!.value
         //tag da classe que estão a criar
-        val tag = Tag(value, document, null)     //ver do pai!!
+        val tag = Tag(value, document, parent)
 
-        for(field in clazz.declaredMemberProperties) {
+        for(field in clazz.classFields) {
             val annotations = field.annotations
             annotations.forEach {
                 when(it) {
@@ -138,14 +167,14 @@ class Mapping {
                 }
             }
         }
-
-        //tem de ver se tem atributos, se tem outras tags
-        //ter uma função que dado uma tag, devolve todos os classFields marcados com essa Tag
-        //usar nas funções criadas acima
-
+        return tag
     }
 
-
+    private fun writeInDoc(): String {
+        val fileName = document.getDocName()
+        document.writeToFile(fileName)
+        val actualXml = File(fileName).readText()
+        return actualXml
+    }
 
 }
-
