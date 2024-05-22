@@ -30,11 +30,11 @@ class Mapping {
     annotation class XmlTagText(val value: String)  //Classe que cujo único filho é text
     //esta anotação e a primeira NÃO podem ser usadas em conjunto
 
-    //@Target(AnnotationTarget.CLASS)
-    //annotation class hasText  //Classe que cujo único filho é text
-
     @Target(AnnotationTarget.PROPERTY)
     annotation class XmlText  //Child de uma tag que só tem text
+
+    @Target(AnnotationTarget.PROPERTY)
+    annotation class ChildWithAttribute(val name: String, val value: String)    //caso uma tag child que está a ser criada vá ter atributos. Se quiserem 2 atributos usar 2x?
 
     private val KClass<*>.getTextField: List<KProperty<*>>
         get() {
@@ -63,8 +63,13 @@ class Mapping {
         var attribute: Attribute? = null
         if(kp.hasAnnotation<XmlAttribute>()){
             val atrName = kp.findAnnotation<XmlAttribute>()!!.name
-            val value = kp.getter.call(createdClass) as String
+            val value = typeToString(kp.getter.call(createdClass))
             attribute = Attribute(atrName, value)
+        } else
+            if(kp.hasAnnotation<ChildWithAttribute>()){     //adiciona tbm os atributos das tags filhas da principal
+            kp.annotations.filterIsInstance<ChildWithAttribute>().map {
+                attribute = Attribute(it.name, it.value)
+            }
         }
         return attribute
     }
@@ -75,23 +80,22 @@ class Mapping {
         return arrayOf(tag.value, "${tag.getAttributes()[0].name}=\"${tag.getAttributes()[0].value}\"")
     }
 
-    //funçao que devolve tag que só tem text como filho
-    private fun getTagText(clazz: KClass<*>, parent: Tag, kp: KProperty<*>): Tag?{
-        var tag: Tag? = null
-        if(kp.hasAnnotation<XmlTagText>()) {
-            val value = kp.findAnnotation<XmlTagText>()!!.value
-            tag = tagWithText(clazz, value, parent, kp)
+    private fun addAttributeToTag(clazz: KClass<*>, tag: Tag) {
+        if(clazz.getAttrFields.isNotEmpty()){
+            clazz.getAttrFields.forEach {setAttribute(it, tag)}
         }
-        return tag
     }
 
     //devolve tag child VAZIA
-    private fun getTagEmpty(clazz: KClass<*>, parent: Tag, kp: KProperty<*>): Tag?{
+    private fun getTagEmpty(parent: Tag, kp: KProperty<*>): Tag?{
         var tag: Tag? = null
         if(kp.hasAnnotation<XmlTag>() && !kp.hasAnnotation<HasTagChildren>()) {
-                val value = kp.findAnnotation<XmlTag>()!!.value
-                tag = Tag(value, document, parent)
+            val value = kp.findAnnotation<XmlTag>()!!.value
+            tag = Tag(value, document, parent)
+            if(kp.hasAnnotation<ChildWithAttribute>()){
+                setAttribute(kp, tag)
             }
+        }
         return tag
     }
 
@@ -99,18 +103,33 @@ class Mapping {
 
     }
 
+    //funçao que devolve tag que só tem text como filho
+    private fun tagChildWithText(clazz: KClass<*>, parent: Tag?, kp: KProperty<*>): Tag?{
+        val tagWithText: Tag? = null
+        if(kp.hasAnnotation<XmlTagText>()) {
+            val value = kp.findAnnotation<XmlTagText>()!!.value
+            val tagWithText = Tag(value, document, parent)
+            setText(clazz, tagWithText, kp)
+            if(kp.hasAnnotation<ChildWithAttribute>()){
+                setAttribute(kp, tagWithText)
+            }
+        }
+        return tagWithText
+    }
 
     //fazer função para obter parâmetros que é texto
     //temos de garantir que se for uma tag com texto TEM APENAS ESSE TEXTO NA CLASSFIELDS
     //Adiciona texto posteriormente
     private fun setText(clazz: KClass<*>, tag: Tag, fieldText: KProperty<*>): Text{
-        val value = fieldText.getter.call(createdClass) as String
+        val value = typeToString(fieldText.getter.call(createdClass))
         return Text(value, tag) //torna a tag parent deste text
     }
 
-    private fun tagWithText(clazz: KClass<*>, value: String, parent: Tag?, field: KProperty<*>): Tag {
+    private fun simpleTagText(clazz: KClass<*>, parent: Tag?, field: KProperty<*>): Tag {
+        val value = clazz.findAnnotation<XmlTagText>()!!.value
         val tagWithTextChild = Tag(value, document, parent)
-        val text = setText(clazz, tagWithTextChild, field)
+        setText(clazz, tagWithTextChild, field)
+        addAttributeToTag(clazz, tagWithTextChild)
         return tagWithTextChild
     }
 
@@ -132,18 +151,10 @@ class Mapping {
         annotations.forEach { annotation ->
             when (annotation) {
                 is XmlTag -> complexTag(clazz, parent)
-                is XmlTagText -> tagText(clazz, parent)
+                is XmlTagText -> simpleTagText(clazz, parent, clazz.getTextField[0])
             }
         }
         return writeInDoc()
-    }
-
-    private fun tagText(clazz: KClass<*>, parent: Tag?) {
-        val value = clazz.findAnnotation<XmlTagText>()!!.value
-        val newtag = tagWithText(clazz, value, parent, clazz.getTextField[0])
-        if(clazz.getAttrFields.isNotEmpty()){
-            clazz.getAttrFields.forEach {setAttribute(it, newtag)}
-        }
     }
 
     //ainda só funciona caso tenha atributos mas não sei se funciona caso tenha outras tags
@@ -156,13 +167,13 @@ class Mapping {
             val annotations = field.annotations
             annotations.forEach {
                 when(it) {
-                    is XmlTagText -> getTagText(clazz, tag, field)
+                    is XmlTagText -> tagChildWithText(clazz, tag, field)
                     is XmlAttribute -> setAttribute(field, tag)
                     is XmlText -> setText(clazz, tag, field)
                     is XmlTag -> if(field.hasAnnotation<HasTagChildren>()){
 
                     } else if (field.annotations.size == 1){
-                        getTagEmpty(clazz, tag, field)
+                        getTagEmpty(tag, field)
                     }
                 }
             }
@@ -177,4 +188,19 @@ class Mapping {
         return actualXml
     }
 
+    //TODO: Tags com filhos dentro da classe a criar; possibilidade de adicionar coisas (atributos, textos, filhos) e remover sem usar diretamente a biblioteca; limitar usar
+
+    private fun typeToString(value: Any?): String {
+        return when (value) {
+            null -> "null"
+            is String -> value
+            is Char -> "'$value'"
+            is Number, is Boolean -> value.toString()
+            is Array<*> -> value.joinToString(prefix = "[", postfix = "]", transform = this::typeToString)
+            is List<*> -> value.joinToString(prefix = "[", postfix = "]", transform = this::typeToString)
+            is Set<*> -> value.joinToString(prefix = "{", postfix = "}", transform = this::typeToString)
+            is Map<*, *> -> value.entries.joinToString(prefix = "{", postfix = "}") { (k, v) -> "${typeToString(k)}: ${typeToString(v)}" }
+            else -> value.toString()
+        }
+    }
 }

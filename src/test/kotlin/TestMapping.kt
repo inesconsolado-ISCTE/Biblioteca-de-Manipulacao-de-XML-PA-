@@ -15,10 +15,10 @@ internal class TestMapping {
         @Mapping.XmlTag("fuc")
         class Fuc(
             @Mapping.XmlAttribute("codigo")
-            val codigo: String
+            val codigo: Int
         )
 
-        val f = Fuc("1234")
+        val f = Fuc(1234)
         val createdXml = map.createClass(f, null, doc)
 
         val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -88,6 +88,7 @@ internal class TestMapping {
             val uc: String,
 
             @Mapping.XmlTag("ects")
+            @Mapping.ChildWithAttribute("codigo", "2345")
             val ects: Any,
         )
 
