@@ -36,6 +36,7 @@ data class Document(val encode: String, val version: String, val name: String): 
         return rootTag.getChildrenOfTag()
     }
 
+
     fun checkIfEntityExists(name: String): Boolean {
         var entityExists = false
         this.accept {
@@ -43,7 +44,7 @@ data class Document(val encode: String, val version: String, val name: String): 
                 entityExists = true
                 return@accept true
             }
-            false
+            true
         }
         return entityExists
     }
@@ -95,7 +96,17 @@ data class Document(val encode: String, val version: String, val name: String): 
         elements.addAll(foundTags)
     }
 
-
+    fun findTag(tagName: String): Tag?{
+        var tagFound : Tag? = null
+        this.accept {
+            if(it is Tag && it.value == tagName){
+                tagFound = it
+                return@accept false
+            }
+            true
+        }
+        return tagFound
+    }
 
     //6. Add atributo globalmente e o resto
     fun addAttributeGlobally(parent: String, name: String, value: String){
@@ -123,7 +134,7 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //8. renomeação de atributos
-    fun renameAttributeGlobally(parent: String, oldname: String, newname: String,newValue: String? = null){
+    fun renameAttributeGlobally(parent: String, oldname: String, newname: String, newValue: String? = null){
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
                 it.changeAttribute(oldname, newname,newValue)

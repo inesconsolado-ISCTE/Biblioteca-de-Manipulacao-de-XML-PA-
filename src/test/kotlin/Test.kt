@@ -275,7 +275,7 @@ class Test {
 
                 val expectedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<plano>\n" +
-                        "    <curso>Mestrado em Engenharia Informática</curso>\n" +
+                        "\t<curso>Mestrado em Engenharia Informática</curso>\n" +
                         "</plano>"
 
                 println("Resultado expectado")
