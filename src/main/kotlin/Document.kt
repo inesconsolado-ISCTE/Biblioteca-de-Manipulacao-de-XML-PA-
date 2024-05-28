@@ -23,8 +23,8 @@ data class Document(val encode: String, val version: String, val name: String): 
      */
     fun setRootTag(root: Tag){
         if (::rootTag.isInitialized) {
-            println(::rootTag.isInitialized)
-            println(getRootTag())
+            //println(::rootTag.isInitialized)
+            //println(getRootTag())
             throw IllegalStateException("A tag root já foi definida para este documento.")
             }
         rootTag = root
@@ -77,7 +77,7 @@ data class Document(val encode: String, val version: String, val name: String): 
      * @param name O nome da entidade a ser verificada.
      * @return `true` se a entidade existir, caso contrário `false`.
      */
-    fun checkIfEntityExists(name: String): Boolean {
+    private fun checkIfEntityExists(name: String): Boolean {
         var entityExists = false
         this.accept {
             if ((it is Tag) && it.value == name) {
@@ -90,7 +90,7 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     /**
-     * Função que executa uma pesquisa XPath simples no documento XML   .
+     * Função que executa uma pesquisa XPath simples no documento XML.
      *
      * @param xpath String do XPath a ser procurado.
      * @return Uma lista de elementos que correspondem à consulta.
@@ -99,15 +99,14 @@ data class Document(val encode: String, val version: String, val name: String): 
         val elements = mutableListOf<XMLChild>()
         val tags = xpath.split("/")
 
-        val firstTag = this.getChildrenOfTag().find { it.value == tags[0] && it is Tag }
-        if (firstTag is ReceivesVisitor) {
-            firstTag.getChildrenOfTag().forEach {
-                if (it.value == tags[1] && it is Tag) {
-                    if (tags.size > 2) {
-                        helper(it, tags, 2, elements)
-                    } else {
+        val firstTag = this.getRootTag()
+
+        firstTag.getChildrenOfTag().forEach {
+            if (it.value == tags[0] && it is Tag) {
+                if (tags.size > 1) {
+                    helper(it, tags, 1, elements)
+                } else {
                         elements.add(it)
-                    }
                 }
             }
         }
@@ -129,20 +128,17 @@ data class Document(val encode: String, val version: String, val name: String): 
         elements: MutableList<XMLChild>
     ) {
         var currentParent: ReceivesVisitor = tag
-        val foundTags = mutableListOf<XMLChild>()
         currentParent.getChildrenOfTag().forEach {
             if (it.value == tags[index] && it is ReceivesVisitor) {
                 if (index == tags.size - 1) {
-                    foundTags.add(it)
+                    elements.add(it)
                 } else {
                     currentParent = it
                     helper(currentParent, tags, index + 1, elements)
                 }
             }
         }
-        elements.addAll(foundTags)
     }
-
     /**
      * Funçaõ que procura uma Tag com o nome especificado.
      *

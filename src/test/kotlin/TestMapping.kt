@@ -1,6 +1,14 @@
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 
+/**
+ * Classe de testes para validar o comportamento do projeto.
+ *
+ * Esta classe contém casos de teste que verificam o correto funcionamento das funcionalidades implementadas
+ * no ficheiro Mapping.kt.
+ *
+ *
+ */
 internal class TestMapping {
 
     val map = Mapping()

@@ -257,14 +257,9 @@ class TestDocument {
         componente5.addAttribute("nome", "Discussão")
         componente5.addAttribute("peso", "20%")
 
-        val resultadoXPath = documento.microXPath("plano/fuc/avaliacao/componente")
+        val resultadoXPath = documento.microXPath("fuc/avaliacao/componente")
 
-        val resultadoXPathesperado = "<componente nome=\"Quizzes\" peso=\"20%\"/>\n" +
-                "<componente nome=\"Projeto\" peso=\"80%\"/>\n" +
-                "<componente nome=\"Dissertação\" peso=\"60%\"/>\n" +
-                "<componente nome=\"Apresentação\" peso=\"20%\"/>\n" +
-                "<componente nome=\"Discussão\" peso=\"20%\"/>\n"
-
+        val resultadoXPathesperado = mutableListOf<XMLChild>(componente1,componente2,componente3,componente4,componente5)
 
         Assertions.assertEquals(resultadoXPath, resultadoXPathesperado)
     }
