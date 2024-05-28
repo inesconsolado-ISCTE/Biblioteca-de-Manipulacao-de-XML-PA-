@@ -155,11 +155,61 @@ class Test {
 
         @Test
         fun accessEntityParent(){
+                val plano = Tag("plano", document)
+                val curso = Tag("curso",document, plano)
+
+                Text("Mestrado em Engenharia Informática", curso)
+
+                val fuc = Tag("fuc",document, plano)
+                fuc.addAttribute("codigo", "M4310")
+
+                val xmlTotal = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<plano>\n" +
+                        "\t<curso>Mestrado em Engenharia Informática</curso>\n" +
+                        "\t<fuc codigo=\"M4310\"/>\n" +
+                        "</plano>"
+                println("Xml completo:")
+                println(xmlTotal)
+
+                val expectedParent = curso.parent
+                val expectedParent2 = fuc.parent
+
+                assertEquals(expectedParent, plano)
+                assertEquals(expectedParent2, plano)
+                assertEquals(null,plano.parent)
+
 
         }
 
         @Test
         fun accessEntityChildren(){
+                val plano = Tag("plano", document)
+                val curso = Tag("curso",document, plano)
+
+                val text = Text("Mestrado em Engenharia Informática", curso)
+
+                val fuc = Tag("fuc",document, plano)
+                fuc.addAttribute("codigo", "M4310")
+
+                val xmlTotal = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<plano>\n" +
+                        "\t<curso>Mestrado em Engenharia Informática</curso>\n" +
+                        "\t<fuc codigo=\"M4310\"/>\n" +
+                        "</plano>"
+                println("Xml completo:")
+                println(xmlTotal)
+
+                val planoChild = plano.getChildrenOfTag()
+                val cursoChild = curso.getChildrenOfTag()
+                val fucChild = fuc.getChildrenOfTag()
+
+                val planoChildExpected :MutableList<XMLChild> = mutableListOf(curso, fuc)
+                val cursoChildExpected :MutableList<XMLChild> = mutableListOf(text)
+                val fucChildExpected :MutableList<XMLChild> = mutableListOf()
+
+                assertEquals(planoChildExpected,planoChild)
+                assertEquals(cursoChildExpected,cursoChild)
+                assertEquals(fucChildExpected,fucChild)
 
         }
 

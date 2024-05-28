@@ -1,5 +1,12 @@
 import java.io.File
 
+/**
+ * Data class que representa um documento XML.
+ *
+ * @property encode A codificação do documento XML.
+ * @property version A versão do documento XML.
+ * @property name O nome do documento.
+ */
 data class Document(val encode: String, val version: String, val name: String): ReceivesVisitor{
 
     //override val children: MutableList<XMLChild> = mutableListOf()
@@ -8,6 +15,12 @@ data class Document(val encode: String, val version: String, val name: String): 
 
     private val xmlDeclarationText = "<?xml version=\"$version\" encoding=\"$encode\"?>"
 
+    /**
+     * Função que define a rootTag(tag raiz) do documento.
+     *
+     * @param root A Tag a ser definida como raiz.
+     * @throws IllegalStateException Se a rootTag já foi definida.
+     */
     fun setRootTag(root: Tag){
         if (::rootTag.isInitialized) {
             println(::rootTag.isInitialized)
@@ -17,6 +30,12 @@ data class Document(val encode: String, val version: String, val name: String): 
         rootTag = root
     }
 
+    /**
+     * Função que obtém a rootTag do documento.
+     *
+     * @return A rootTag do documento.
+     * @throws IllegalStateException Se a rootTag ainda não for definida.
+     */
     fun getRootTag(): Tag{
         if (!::rootTag.isInitialized) {
             throw IllegalStateException("A tag root já foi definida para este documento.")
@@ -24,19 +43,41 @@ data class Document(val encode: String, val version: String, val name: String): 
         return rootTag
     }
 
+
+    /**
+     * Função que verifica se a rootTag foi inicializada.
+     *
+     * @return `true` se a rootTag foi inicializada, caso contrário `false`.
+     */
     fun isRootTagInitialized(): Boolean {
         return ::rootTag.isInitialized
     }
 
+    /**
+     * Função que obtém o nome do documento.
+     *
+     * @return O nome do documento.
+     */
     fun getDocName(): String{
         return name
     }
 
+    /**
+     * Função que obtém os filhos da rootTag.
+     *
+     * @return Uma lista de filhos da rootTag, ou uma lista vazia se a rootTag ainda não estiver inicializada.
+     */
     override fun getChildrenOfTag(): List<XMLChild> {
         return rootTag.getChildrenOfTag()
     }
 
 
+    /**
+     * Função que verifica se uma entidade com o nome especificado existe no documento.
+     *
+     * @param name O nome da entidade a ser verificada.
+     * @return `true` se a entidade existir, caso contrário `false`.
+     */
     fun checkIfEntityExists(name: String): Boolean {
         var entityExists = false
         this.accept {
@@ -49,6 +90,12 @@ data class Document(val encode: String, val version: String, val name: String): 
         return entityExists
     }
 
+    /**
+     * Função que executa uma pesquisa XPath simples no documento XML   .
+     *
+     * @param xpath String do XPath a ser procurado.
+     * @return Uma lista de elementos que correspondem à consulta.
+     */
     fun microXPath(xpath: String): MutableList<XMLChild> {
 
         val elements = mutableListOf<XMLChild>()
@@ -73,6 +120,14 @@ data class Document(val encode: String, val version: String, val name: String): 
         return elements
     }
 
+    /**
+     * Função auxiliar da função `microXPath`.
+     *
+     * @param tag A tag atual que está sendo processada.
+     * @param tags A lista de tags do caminho XPath.
+     * @param index O índice atual na lista de tags.
+     * @param elements A lista de elementos correspondentes encontrados.
+     */
     private fun helper(tag: ReceivesVisitor, tags: List<String>, index: Int, elements: MutableList<XMLChild>) {
         var currentParent: ReceivesVisitor = tag
         println("estou no helper")
@@ -96,6 +151,12 @@ data class Document(val encode: String, val version: String, val name: String): 
         elements.addAll(foundTags)
     }
 
+    /**
+     * Funçaõ que procura uma Tag com o nome especificado.
+     *
+     * @param tagName O nome da tag a ser encontrada.
+     * @return A tag encontrada, ou `null` se nenhuma Tag com o nome especificado for encontrada.
+     */
     fun findTag(tagName: String): Tag?{
         var tagFound : Tag? = null
         this.accept {
@@ -109,6 +170,14 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //6. Add atributo globalmente e o resto
+    /**
+     * Função que adiciona um atributo globalmente a todas as tags com o nome especificado.
+     *
+     *
+     * @param parent O nome das tags onde o atributo deve ser adicionado.
+     * @param name O nome do atributo a ser adicionado.
+     * @param value O valor do atributo a ser adicionado.
+     */
     fun addAttributeGlobally(parent: String, name: String, value: String){
         this.accept {
             if((it is Tag) && it.value == parent) {
@@ -120,6 +189,13 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //7.  renomeação de entidades globalmente ao documento (fornecendo nome antigo e nome novo)
+    /**
+     * Função que renomeia uma entidade globalmente do documento.
+     *
+     * @param oldname O nome antigo da entidade.
+     * @param newname O novo nome da entidade.
+     * @throws IllegalArgumentException Se a entidade com o nome antigo não existir.
+     */
     fun renameEntityGlobally(oldname: String, newname: String){
         if(checkIfEntityExists(oldname)) {
             this.accept {
@@ -134,6 +210,14 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //8. renomeação de atributos
+    /**
+     * Função que renomeia um atributo globalmente do documento, numa determinada Tag.
+     *
+     * @param parent O nome das Tag's onde o atributo deve ser renomeado.
+     * @param oldname O nome antigo do atributo.
+     * @param newname O novo nome do atributo.
+     * @param newValue O novo valor do atributo (opcional).
+     */
     fun renameAttributeGlobally(parent: String, oldname: String, newname: String, newValue: String? = null){
         this.accept {
             if((it is Tag) && it.value.equals(parent)) {
@@ -145,6 +229,12 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //9. remoção de entidades globalmente ao documento
+    /**
+     * Função que remove uma entidade globalmente do documento.
+     *
+     * @param name O nome da entidade a ser removida.
+     * @throws IllegalArgumentException Se a entidade com o nome especificado não existir.
+     */
     fun removeEntityGlobally(name: String){
         if(checkIfEntityExists(name)) {
             this.accept {
@@ -159,6 +249,12 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //10. remoçao de atributos globalmente ao documento
+    /**
+     * Função que remove um atributo globalmente do documento.
+     *
+     * @param parent O nome das Tag's onde o atributo deve ser removido.
+     * @param name O nome do atributo a ser removido.
+     */
     fun removeAttributeGlobally(parent: String, name: String){
         this.accept {
             if((it is Tag) && it.value == parent) {
@@ -170,10 +266,23 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
     //4. prettyPrint: escrever tudo no ficheiro e pôr bonito
+    /**
+     * Função que gera uma representação formatada do documento XML.
+     *
+     * @return Uma string contendo o documento XML formatado.
+     */
     fun prettyPrint(): String {
         return "$xmlDeclarationText\n" + prettyPrintLine(rootTag,0).trim()
     }
 
+    /**
+     *  Função auxiliar da prettyPrint que gera uma linha formatada para o elemento XML especificado.
+     *
+     * @param child O elemento XML a ser formatado.
+     * @param level O nível de indentação.
+     * @param isTextChild Indica se o elemento é um filho de texto.
+     * @return Uma string contendo o elemento XML formatado.
+     */
     private fun prettyPrintLine(child: XMLChild, level: Int, isTextChild: Boolean = false): String {
         val result = StringBuilder()
 
@@ -219,10 +328,13 @@ data class Document(val encode: String, val version: String, val name: String): 
     }
 
 
+    /**
+     * Função que escreve o conteúdo formatado do documento XML em um ficheiro.
+     *
+     * @param fileName O nome do ficheiro onde o conteúdo XML será escrito.
+     */
     fun writeToFile(fileName: String) {
         val content = prettyPrint()
         File(fileName).writeText(content)
     }
-
-
 }
