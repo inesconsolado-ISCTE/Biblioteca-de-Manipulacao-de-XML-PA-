@@ -199,19 +199,26 @@ class Mapping {
         if(clazz.hasAnnotation<XmlTag>() || clazz.hasAnnotation<XmlTagText>()) {
             val annotations = clazz.annotations
             val tagName = annotations.mapNotNull {
-                when(it) {
+                when (it) {
                     is XmlTagText -> it.value
                     is XmlTag -> it.value
                     else -> null
                 }
             }
-            if(clazz.hasAnnotation<XmlAdapter>()) {
-                if (doc.findTag(tagName.get(0)) != null) {
-                    val newTag = doc.findTag(tagName.get(0))
-                    val adapterInstance = clazz.java.getDeclaredConstructor().newInstance() as Adapter
-                    newTag?.let { adapterInstance.adaptValue(it) }
+            if (clazz.hasAnnotation<XmlAdapter>()) {
+                if (doc.findTag(tagName[0]) != null) {
+                    val newTag = doc.findTag(tagName[0])
+                    val xmlAdapterAnnotation = clazz.annotations.filterIsInstance<XmlAdapter>().firstOrNull()
+                    val adapterClass = xmlAdapterAnnotation?.adapterC?.java
+                    if (adapterClass != null) {
+                        val adapterInstance = adapterClass.getDeclaredConstructor().newInstance() as Adapter
+                        newTag?.let { adapterInstance.adaptValue(it) }
+                    }
                 }
             }
+        }
+        else {
+
         }
         return writeInDoc()
     }
@@ -233,7 +240,7 @@ class Mapping {
                     is XmlText -> setText(clazz, tag, field)
                     is XmlTag -> if(field.hasAnnotation<HasTagChildren>()){
                         getTagWithChildren(tag, field)
-                    } else if (field.annotations.size == 1){    //mudar para ter childwithAttr
+                    } else {    //mudar para ter childwithAttr
                         getTagEmpty(tag, field)
                     }
                 }

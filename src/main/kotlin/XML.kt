@@ -9,7 +9,7 @@
  * @property value Esta propriedade representa o valor atribuído ao XMLChild. No caso do Text é o próprio texto a inserir e
  *                  no caso da Tag é o nome da mesma.
  *
- * @property parent Esta propriedade representa o pai da XMLChild. No caso será uma Tag ou `null` caso não tenha uma Tag pai.
+ * @property parent Esta propriedade representa o pai da XMLChild. No caso será uma Tag ou null caso não tenha uma Tag pai.
  *                  A última hipótese só ocorre na rootTag de um documento.
  */
 sealed interface XMLChild{
@@ -43,10 +43,10 @@ sealed interface ReceivesVisitor{
      * @param visitor Uma função que representa o visitante, a função retorna um
      * boolean que indica se o visitante deve continuar a visitar os filhos do elemento atual.
      *
-     * A implementação padrão verifica se o visitante deseja continuar a visita (retornando `true`).
+     * A implementação padrão verifica se o visitante deseja continuar a visita (retornando true).
      * Se sim, cria uma cópia da lista de filhos para evitar problemas de modificação
      * concorrente durante a iteração. Cada filho que também implementa [ReceivesVisitor]
-     * chama recursivamente o método `accept` para permitir que o visitante opere na hierarquia.
+     * chama recursivamente o método accept para permitir que o visitante opere na hierarquia.
      */
     fun accept(visitor: (ReceivesVisitor) -> Boolean){
         if (visitor(this)) {
@@ -69,12 +69,13 @@ sealed interface ReceivesVisitor{
  *
  * @property value O valor da tag; o seu nome: <value>
  * @property document O documento ao qual esta Tag pertence.
- * @property parent A Tag pai da Tag. No caso de `null` a Tag é a rootTag do documento.
+ * @property parent A Tag pai da Tag. No caso de null a Tag é a rootTag do documento.
  */
 data class Tag(override var value: String, private val document: Document, override val parent: Tag?=null ) : XMLChild, ReceivesVisitor {
 
     private val children: MutableList<XMLChild> = mutableListOf()
     private val attributes: MutableList<Attribute> = mutableListOf()
+    val doc = document
 
     init {
 
@@ -144,7 +145,7 @@ data class Tag(override var value: String, private val document: Document, overr
      * Função que verifica se um atributo com o nome especificado existe.
      *
      * @param name O nome do atributo a ser verificado.
-     * @return `true` se o atributo existir, caso contrário `false`.
+     * @return true se o atributo existir, caso contrário false.
      */
     private fun checkIfAttributeExists(name: String): Boolean{
         if (attributes.any { it.name == name }) {
