@@ -153,8 +153,7 @@ class TestDocument {
 
     @Test
     fun testPrettyPrint() {
-        val documento = Document("UTF-8", "1.0","exemplo2")
-        val plano = Tag("plano", documento)
+        val plano = Tag("plano", document)
 
         val curso = Tag("curso",document, plano)
         Text("Mestrado em Engenharia Informática", curso)
@@ -190,7 +189,7 @@ class TestDocument {
         componente5.addAttribute("nome", "Discussão")
         componente5.addAttribute("peso", "20%")
 
-        val xmlFormatado = documento.prettyPrint()
+        val xmlFormatado = document.prettyPrint()
 
         val xmlEsperado = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<plano>\n" +
@@ -262,5 +261,96 @@ class TestDocument {
         val resultadoXPathesperado = mutableListOf<XMLChild>(componente1,componente2,componente3,componente4,componente5)
 
         Assertions.assertEquals(resultadoXPath, resultadoXPathesperado)
+    }
+
+    @Test
+    fun testFindTag(){
+        val plano = Tag("plano", document)
+
+        val curso = Tag("curso",document, plano)
+        Text("Mestrado em Engenharia Informática", curso)
+
+        val fuc1 = Tag("fuc",document, plano)
+        fuc1.addAttribute("codigo", "M4310")
+        val nome1 = Tag("nome",document, fuc1)
+        Text("Programação Avançada", nome1)
+        val ects1 = Tag("ects",document, fuc1)
+        Text("6.0", ects1)
+        val avaliacao1 = Tag("avaliacao",document, fuc1)
+        val componente1 = Tag("componente",document, avaliacao1)
+        componente1.addAttribute("nome", "Quizzes")
+        componente1.addAttribute("peso", "20%")
+        val componente2 = Tag("componente",document, avaliacao1)
+        componente2.addAttribute("nome", "Projeto")
+        componente2.addAttribute("peso", "80%")
+
+        document.findTag("fuc")
+    }
+
+    @Test
+    fun testWriteFile(){
+        val plano = Tag("plano", document)
+
+        val curso = Tag("curso",document, plano)
+        Text("Mestrado em Engenharia Informática", curso)
+
+        val fuc1 = Tag("fuc",document, plano)
+        fuc1.addAttribute("codigo", "M4310")
+        val nome1 = Tag("nome",document, fuc1)
+        Text("Programação Avançada", nome1)
+        val ects1 = Tag("ects",document, fuc1)
+        Text("6.0", ects1)
+        val avaliacao1 = Tag("avaliacao",document, fuc1)
+        val componente1 = Tag("componente",document, avaliacao1)
+        componente1.addAttribute("nome", "Quizzes")
+        componente1.addAttribute("peso", "20%")
+        val componente2 = Tag("componente",document, avaliacao1)
+        componente2.addAttribute("nome", "Projeto")
+        componente2.addAttribute("peso", "80%")
+
+        val fuc2 = Tag("fuc",document, plano)
+        fuc2.addAttribute("codigo", "03782")
+        val nome2 = Tag("nome",document, fuc2)
+        Text("Dissertação", nome2)
+        val ects2 = Tag("ects",document, fuc2)
+        Text("42.0", ects2)
+        val avaliacao2 = Tag("avaliacao",document, fuc2)
+        val componente3 = Tag("componente",document,avaliacao2)
+        componente3.addAttribute("nome", "Dissertação")
+        componente3.addAttribute("peso", "60%")
+        val componente4 = Tag("componente",document, avaliacao2)
+        componente4.addAttribute("nome", "Apresentação")
+        componente4.addAttribute("peso", "20%")
+        val componente5 = Tag("componente",document,avaliacao2)
+        componente5.addAttribute("nome", "Discussão")
+        componente5.addAttribute("peso", "20%")
+
+        val xmlEsperado = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<plano>\n" +
+                "\t<curso>Mestrado em Engenharia Informática</curso>\n" +
+                "\t<fuc codigo=\"M4310\">\n" +
+                "\t\t<nome>Programação Avançada</nome>\n" +
+                "\t\t<ects>6.0</ects>\n" +
+                "\t\t<avaliacao>\n" +
+                "\t\t\t<componente nome=\"Quizzes\" peso=\"20%\"/>\n" +
+                "\t\t\t<componente nome=\"Projeto\" peso=\"80%\"/>\n" +
+                "\t\t</avaliacao>\n" +
+                "\t</fuc>\n" +
+                "\t<fuc codigo=\"03782\">\n" +
+                "\t\t<nome>Dissertação</nome>\n" +
+                "\t\t<ects>42.0</ects>\n" +
+                "\t\t<avaliacao>\n" +
+                "\t\t\t<componente nome=\"Dissertação\" peso=\"60%\"/>\n" +
+                "\t\t\t<componente nome=\"Apresentação\" peso=\"20%\"/>\n" +
+                "\t\t\t<componente nome=\"Discussão\" peso=\"20%\"/>\n" +
+                "\t\t</avaliacao>\n" +
+                "\t</fuc>\n" +
+                "</plano>"
+
+        val fileName = "outputWriteToFile.xml"
+        document.writeToFile(fileName)
+        val actualXml = File(fileName).readText()
+
+        Assertions.assertEquals(xmlEsperado, actualXml)
     }
 }

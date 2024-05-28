@@ -81,6 +81,22 @@ class TestXML {
         }
 
         @Test
+        fun getAttribute(){
+                val plano = Tag("plano", document)
+
+                val curso = Tag("curso", document,plano)
+
+                Text("Mestrado em Engenharia Informática", curso)
+
+                val fuc = Tag("fuc", document, plano)
+                val attribute = Attribute("codigo", "M4310")
+                fuc.addAttribute("codigo", "M4310")
+
+                val expectedAttribute = listOf(attribute)
+
+                assertEquals(expectedAttribute, fuc.getAttributes())
+        }
+        @Test
         fun removeAttribute() {
                 val plano = Tag("plano", document)
                 val curso = Tag("curso",document, plano)
