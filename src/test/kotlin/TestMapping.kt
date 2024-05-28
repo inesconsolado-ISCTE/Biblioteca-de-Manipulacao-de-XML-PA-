@@ -337,7 +337,6 @@ internal class TestMapping {
         assertEquals(expectedAdaptedXml, adaptedTag)
     }
 
-
     @Test
     fun adaptEntityChild(){
 

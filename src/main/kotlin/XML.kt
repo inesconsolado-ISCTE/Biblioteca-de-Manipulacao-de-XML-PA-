@@ -207,6 +207,30 @@ data class Tag(override var value: String, private val document: Document, overr
 
     }
 
+    /**
+     * Operador para aceder um filho de uma tag pelo seu nome.
+     *
+     * O seu uso é por [...]
+     *
+     * @param name O nome do filho a ser procurado.
+     * @return O filho encontrado com o nome especificado, ou `null` se nenhum filho for encontrado.
+     */
+    operator fun get(name: String): XMLChild? = children.find { it.value == name }
+
+    /**
+     * Função infix para adicionar um atributo a uma tag.
+     *
+     * @param a O atributo a ser adicionado à tag.
+     */
+    infix fun addattribute(a: Attribute) = this.addAttribute(a.name, a.value)
+
+    /**
+     * Função infix para remover um atributo de uma tag.
+     *
+     * @param a O atributo a ser removido da tag.
+     */
+    infix fun deleteattribute(a: Attribute) = this.removeAttribute(a.name)
+
 }
 /**
  * Data class que representa um atributo de uma Tag.

@@ -328,5 +328,45 @@ data class Document(val encode: String, val version: String, val name: String): 
         File(fileName).writeText(content)
     }
 
+    /**
+     * Função de extensão para criar uma tag raiz num documento.
+     *
+     * Esta função cria uma nova tag raiz com o nome especificado e aplica a função de construção fornecida
+     * a ela. A tag raiz não tem pai, por isso o parâmetro `parent` é definido como `null`.
+     *
+     * @param name O nome da tag raiz a ser criada.
+     * @param build A função de construção a ser aplicada à tag criada.
+     * @return A tag raiz criada.
+     */
+
+    fun tag(name: String, build: Tag.() -> Unit ): Tag =
+        Tag(name, this, null).apply{
+            build(this)
+        }
 
 }
+
+/**
+ * Função de extensão para adicionar uma tag filha a uma tag existente.
+ *
+ * Esta função cria uma nova tag filha com o nome especificado e aplica a função de construção fornecida
+ * a ela. A tag filha será adicionada à tag atual (`this`).
+ *
+ * @receiver A tag à qual a nova tag filha será adicionada.
+ * @param name O nome da tag filha a ser criada.
+ * @param build A função de construção a ser aplicada à tag filha criada.
+ * @return A tag filha criada.
+ */
+fun Tag.tag(name: String, build: Tag.() -> Unit): Tag =
+    Tag(name, this.doc, this).apply {
+        build(this)
+    }
+
+/**
+ * Função de extensão para adicionar texto a uma tag.
+ *
+ * @receiver A tag à qual o texto será adicionado.
+ * @param text O texto a ser inserido na tag.
+ * @return O objeto `Text` criado.
+ */
+fun Tag.textInTag(text: String) = Text(text,this)

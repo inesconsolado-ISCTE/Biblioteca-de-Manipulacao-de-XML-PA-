@@ -6,7 +6,7 @@ import kotlin.reflect.full.*
 /**
  * Interface para transformar strings.
  *
- * Esta interface irá ser usada no caso de o utilizador queira implementar
+ * Esta interface irá ser usada no caso de o utilizador querer implementar
  * mudanças no atributo de uma Tag.
  *
  * */
@@ -24,7 +24,7 @@ interface StringTransformer{
  */
 interface Adapter{
     /**
-     * Função que adapta o valor da Tag fornecida.
+     * Função que adapta as características da Tag fornecida.
      * @param tag A Tag a ser adaptada.
      */
     fun adaptValue(tag: Tag)
@@ -57,7 +57,7 @@ class Mapping {
     annotation class XmlTag(val value: String)  //Classe que não vai ter text como filho
 
     /**
-     * Anotação para definir que uma Tag tem filhos.
+     * Anotação para definir que uma Tag filha que tem filhos.
      */
     @Target(AnnotationTarget.PROPERTY)
     annotation class HasTagChildren  //Tag passada como argumento que vai ter filhos (lista de uma tag já criada)
@@ -170,9 +170,8 @@ class Mapping {
      *
      * @param field A propriedade que contém o atributo.
      * @param tag A tag onde o atributo será definido.
-     * @return Um array contendo o valor da Tag e seu atributo.
      */
-    private fun setAttribute(field: KProperty<*>, tag: Tag): Array<String> {
+    private fun setAttribute(field: KProperty<*>, tag: Tag){
         val atr = getAttribute(field)
         if(field.hasAnnotation<XmlString>()){
             val clazz = field.findAnnotation<XmlString>()!!.transformerC
@@ -182,7 +181,6 @@ class Mapping {
             atr.value = newValue
         }
         tag.addAttribute(atr!!.name, atr.value)
-        return arrayOf(tag.value, "${tag.getAttributes()[0].name}=\"${tag.getAttributes()[0].value}\"")
     }
 
     /**
@@ -199,7 +197,7 @@ class Mapping {
 
     //devolve tag child VAZIA
     /**
-     * Função que retorna uma Tag filha vazia.
+     * Função que retorna uma Tag filha vazia, que pode ter atributos.
      *
      * @param parent A tag pai.
      * @param kp A propriedade a ser verificada.
@@ -215,7 +213,7 @@ class Mapping {
     }
 
     /**
-     * Função que cria uma Tag com filhos.
+     * Função que cria uma Tag filha com filhos.
      *
      * @param parent A tag pai.
      * @param kp A propriedade a ser verificada.
@@ -280,7 +278,7 @@ class Mapping {
     }
 
     /**
-     * Cria uma Tag que tem como filho um Text.
+     * Cria uma Tag que tem como filho um Text. Usado apenas com a criação da classe.
      *
      * @param clazz A classe associada à Tag.
      * @param parent A Tag pai, se houver.
@@ -417,10 +415,8 @@ class Mapping {
         return actualXml
     }
 
-    //TODO: possibilidade de adicionar e alterar coisas (atributos, textos, filhos) e remover sem usar diretamente a biblioteca; limitar uso FAZER REGRAS
-
     /**
-     * Função que converte um valor de qualquer tipo em uma representação de String.
+     * Função que converte um valor de qualquer tipo numa representação de String.
      *
      * @param value O valor a ser convertido em String.
      * @return A representação de String do valor.
