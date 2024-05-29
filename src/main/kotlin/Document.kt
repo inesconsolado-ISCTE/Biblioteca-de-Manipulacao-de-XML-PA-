@@ -9,7 +9,6 @@ import java.io.File
  */
 data class Document(val encode: String, val version: String, val name: String): ReceivesVisitor{
 
-    //override val children: MutableList<XMLChild> = mutableListOf()
 
     private lateinit var rootTag: Tag
 
@@ -160,7 +159,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         return tagFound
     }
 
-    //6. Add atributo globalmente e o resto
     /**
      * Função que adiciona um atributo globalmente a todas as tags com o nome especificado.
      *
@@ -179,7 +177,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         }
     }
 
-    //7.  renomeação de entidades globalmente ao documento (fornecendo nome antigo e nome novo)
     /**
      * Função que renomeia uma entidade globalmente do documento.
      *
@@ -200,7 +197,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         else throw IllegalArgumentException("Não pode alterar uma tag que não existe.")
     }
 
-    //8. renomeação de atributos
     /**
      * Função que renomeia um atributo globalmente do documento, numa determinada Tag.
      *
@@ -219,7 +215,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         }
     }
 
-    //9. remoção de entidades globalmente ao documento
     /**
      * Função que remove uma entidade globalmente do documento.
      *
@@ -239,7 +234,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         } else throw IllegalArgumentException("Não pode remover uma tag que não existe.")
     }
 
-    //10. remoçao de atributos globalmente ao documento
     /**
      * Função que remove um atributo globalmente do documento.
      *
@@ -256,7 +250,6 @@ data class Document(val encode: String, val version: String, val name: String): 
         }
     }
 
-    //4. prettyPrint: escrever tudo no ficheiro e pôr bonito
     /**
      * Função que gera uma representação formatada do documento XML.
      *
