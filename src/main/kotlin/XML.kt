@@ -1,6 +1,3 @@
-//VAL É IMUTÁVEL
-//VAR É MUTÁVEL
-
 /**
  * Interface que representa um elemento filho em uma estrutura XML.
  *
@@ -33,9 +30,6 @@ sealed interface ReceivesVisitor{
      */
     fun getChildrenOfTag(): List<XMLChild>
 
-    //Implementação da interface visitor
-    //XMLParent é o que está a ser visitado (daí implementarmos aqui): o documento (e consequentemente tags)
-
     /**
      * Aceita um visitante e permite que ele execute operações no elemento atual
      * e nos seus filhos.
@@ -58,11 +52,6 @@ sealed interface ReceivesVisitor{
         }
     }
 }
-
-/*Notinhas:
-- só pode haver uma root tag
-- é melhor separar tudo em ficheiros diferentes, em termos de "bom design"? Se sim, tiramos o sealed das interfaces
-*/
 
 /**
  * Data class que representa uma Tag em um documento XML.
@@ -140,7 +129,6 @@ data class Tag(override var value: String, private val document: Document, overr
         return attributes
     }
 
-    //pensei em devolver Boolean ou então a posição dele se existir
     /**
      * Função que verifica se um atributo com o nome especificado existe.
      *
@@ -154,9 +142,6 @@ data class Tag(override var value: String, private val document: Document, overr
             return false
         }
     }
-
-    //2. Add, remover e alterar atributos em entidades
-    //Podiamos usar ignoreCase = true
 
     /**
      * Função que adiciona um atributo à Tag.
@@ -185,7 +170,6 @@ data class Tag(override var value: String, private val document: Document, overr
         } else throw IllegalArgumentException("Não é possivel remover o atributo dado, não existe nenhum associado a esta Tag com esse nome.")
     }
 
-    //isto antes recebia um atributo e um novo nome mas eu mudei para um nome antigo em vez de um objeto atributo, para se usar numa func do documento (e assim n tem de se criar o objeto para lhe acedermos?)
     /**
      * Função que altera um atributo da Tag.
      *
