@@ -50,7 +50,6 @@ class Mapping {
         this.document = doc
     }
 
-    //value vai ser o nome associado à Tag
     /**
      * Anotação para definir uma Tag XML que não tenha apenas um Text como filho.
      * @property value O nome associado à Tag.
@@ -145,7 +144,6 @@ class Mapping {
         }
 
 
-    //fazer função para obter parâmetros que são atributos
     /**
      * Função que obtém o atributo XML de uma propriedade.
      *
@@ -197,7 +195,6 @@ class Mapping {
         }
     }
 
-    //devolve tag child VAZIA
     /**
      * Função que retorna uma Tag filha vazia, que pode ter atributos.
      *
@@ -240,7 +237,6 @@ class Mapping {
         }
     }
 
-    //funçao que devolve tag que só tem text como filho
     /**
      * Função que devolve uma Tag que só tem Text como filho.
      *
@@ -262,9 +258,6 @@ class Mapping {
         return tagWithText
     }
 
-    //fazer função para obter parâmetros que é texto
-    //temos de garantir que se for uma tag com texto TEM APENAS ESSE TEXTO NA CLASSFIELDS
-    //Adiciona texto posteriormente
     /**
      * Função que associa o objeto Text definido por @XmlText num pârametro à Tag parent.
      *
@@ -295,10 +288,6 @@ class Mapping {
         return tagWithTextChild
     }
 
-
-    //nesta função ler o nome da classe e os parametros dados e criar tags e atributos e texto?
-    //esta função devolve coisas para os testes -> Ainda não funciona para escrever num documento
-
     /**
      * Função que cria uma representação XML de uma classe específica.
      *
@@ -321,7 +310,6 @@ class Mapping {
             throw IllegalStateException("A root tag já foi definida para este documento.")
         }
 
-        // Criar a nova tag
         annotations.forEach { annotation ->
             when (annotation) {
                 is XmlTag -> complexTag(clazz, parent)
@@ -331,8 +319,6 @@ class Mapping {
         return writeInDoc()
     }
 
-
-    //é suposto chamar isto quando se usa o XmlAdapter
     /**
      * Processa as alterações numa Tag existente com base na sua anotação e aplica um adaptador, se fornecido.
      *
@@ -384,8 +370,6 @@ class Mapping {
         return File(fileName).readText()
     }
 
-
-    //ainda só funciona caso tenha atributos mas não sei se funciona caso tenha outras tags
     /**
      * Cria uma Tag com base nas anotações presentes na classe.
      *
