@@ -13,8 +13,6 @@ internal class TestMapping {
 
     val map = Mapping()
 
-    //se uma classe tem texto como filho: não pode ter mais filhos nenhuns
-
     @Test
     fun tagWithAttribute(){
         val doc = Document("UTF-8", "1.0", "testAttribute")
@@ -36,7 +34,7 @@ internal class TestMapping {
     }
 
     @Test
-    fun tagWithText(){  //tag que só vai ter texto como filho
+    fun tagWithText(){  
         val doc = Document("UTF-8", "1.0", "testTagText")
 
         @Mapping.XmlTagText("nome")
@@ -60,7 +58,7 @@ internal class TestMapping {
     }
 
     @Test
-    fun tagWithSimpleChildren(){ //tag com atributos e com tags vazias ou com texto
+    fun tagWithSimpleChildren(){ 
         val doc = Document("UTF-8", "1.0", "testSimpleTags")
 
         @Mapping.XmlTag("fuc")
