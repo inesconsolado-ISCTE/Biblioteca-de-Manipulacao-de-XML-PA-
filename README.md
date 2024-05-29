@@ -278,3 +278,15 @@ val adaptedTag = map.processChanges(f, doc)
 
 > Limitações das anotações:
 
+  - *@XmlTag: não pode ser usada com @XmlAttribute, @XmlTagText, @XmlText.
+  - @HasTagChildren: só pode ser usada com @XmlTag. 
+  - *@XmlAttribute: só pode ser usada com @XmlString. 
+  - *@XmlTagText: só pode ser usada com @XmlChildWithAttribute (se estiver a ser usada para um pârametro) e com @XmlAdapter (na classe).
+  - Quando se cria uma classe com a anotação @XmlTagText, só pode ter como pârametros: @XmlText e @XmlAttribute.
+  - *@XmlText: só pode ser usada quando a classe tem anotação @XmlTagText. Não pode ser usada em conjunto com mais nenhuma anotação.
+  - @ChildWithAttribute: não pode ser usada com nenhum pârametro que não vá ser uma tag (@XmlTag ou @XmlTagText).
+  - Todas as anotações com o símbolo * podem também ser usadas sozinhas.
+  - Destaca-se o seguinte: ao dizer que uma anotação não pode ser usada com outra, é referente ao mesmo parâmetro, i.e se uma classe tiver vários pârametros as anotações proibidas podem ser usadas noutros.
+
+
+
