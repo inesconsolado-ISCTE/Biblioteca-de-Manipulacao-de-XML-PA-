@@ -252,11 +252,25 @@ Com a primeira opção, é possível usar as seguintes anotações:
 ```
 Por fim, existem mais duas anotações para manipular a tag criada e os seus componentes:
 
-- @Mapping.XmlString(AddPercentage::class)
--> que recebe uma KClass que herda da interface StringTransformer (obrigatoriamente). Esta anotação é usada como forma de personalização do texto que é inserido no XML resultante de valores de atributos dos objetos.
+- @Mapping.XmlString(KClass<out StringTransformer>)
+-> que recebe uma KClass que herda da interface StringTransformer(obrigatoriamente). Esta anotação é usada como forma de personalização do texto que é inserido no XML resultante de valores de atributos dos objetos.
 
-- @Mapping.XmlAdapter(TestAdapter::class), que recebe uma KClass que herda da interface Adapter (obrigatoriamente). Esta anotação é utilizada como forma de personalização pós-mapeamento, que associa um adaptador que faz alterações livres na entidade XML após mapeamento
+- @Mapping.XmlAdapter(KClass<out Adapter>), que recebe uma KClass que herda da interface Adapter (obrigatoriamente). Esta anotação é utilizada como forma de personalização pós-mapeamento, que associa um adaptador que faz alterações livres na entidade XML após mapeamento
 automático.
+
+Para auxiliar estas anotações existem as duas interfaces mencionadas:
+```sh
+interface Adapter{
+    fun adaptValue(tag: Tag)
+}
+
+interface StringTransformer{
+    fun changeValue(original: String): String   //para receber uma String então tenho de implementar isto no sitio em que os valores já tenham sido convertidos para String
+}
+
+-> As intruções de manipulação têm de ser definidas dentro das funções de implementação obrigatória das interfaces. 
+```
+
 
 - Para fazer o mapeamento, instancia-se a classe criada, como no exemplo:
 ```sh
@@ -286,7 +300,7 @@ val adaptedTag = map.processChanges(f, doc)
   - *@XmlText: só pode ser usada quando a classe tem anotação @XmlTagText. Não pode ser usada em conjunto com mais nenhuma anotação.
   - @ChildWithAttribute: não pode ser usada com nenhum pârametro que não vá ser uma tag (@XmlTag ou @XmlTagText).
   - Todas as anotações com o símbolo * podem também ser usadas sozinhas.
-  - Destaca-se o seguinte: ao dizer que uma anotação não pode ser usada com outra, é referente ao mesmo parâmetro, i.e se uma classe tiver vários pârametros as anotações proibidas podem ser usadas noutros.
+> Destaca-se o seguinte: ao dizer que uma anotação não pode ser usada com outra, é referente ao mesmo parâmetro, i.e se uma classe tiver vários pârametros as anotações proibidas podem no geral ser usadas noutros (a menos que se verifique uma das regras).
 
 
 
