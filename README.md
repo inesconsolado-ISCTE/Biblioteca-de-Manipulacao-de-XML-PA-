@@ -265,7 +265,7 @@ interface Adapter{
 }
 
 interface StringTransformer{
-    fun changeValue(original: String): String   //para receber uma String então tenho de implementar isto no sitio em que os valores já tenham sido convertidos para String
+    fun changeValue(original: String): String
 }
 
 -> As intruções de manipulação têm de ser definidas dentro das funções de implementação obrigatória das interfaces. 
