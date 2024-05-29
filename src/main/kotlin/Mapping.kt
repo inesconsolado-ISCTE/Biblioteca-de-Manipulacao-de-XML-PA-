@@ -1,6 +1,8 @@
 import java.io.File
+import javax.print.Doc
 import kotlin.reflect.*
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.internal.impl.resolve.scopes.MemberScope.Empty
 
 
 /**
@@ -315,7 +317,6 @@ class Mapping {
         val clazz = createdClass::class
         val annotations = clazz.annotations
         //tipo de anotação da classe e age consoante isso
-
         if (parent == null && doc.isRootTagInitialized()) {
             throw IllegalStateException("A root tag já foi definida para este documento.")
         }
@@ -339,33 +340,48 @@ class Mapping {
      * @param doc O documento XML em que a Tag está presente.
      * @return O documento XML atualizado.
      */
-    fun processChanges(actualTag: Any, doc: Document): String{
+    fun processChanges(actualTag: Any, doc: Document): String {
         val clazz = actualTag::class
-        if(clazz.hasAnnotation<XmlTag>() || clazz.hasAnnotation<XmlTagText>()) {
-            val annotations = clazz.annotations
-            val tagName = annotations.mapNotNull {
-                when (it) {
-                    is XmlTagText -> it.value
-                    is XmlTag -> it.value
-                    else -> null
+        if (clazz.hasAnnotation<XmlAdapter>()) {
+            if (clazz.hasAnnotation<XmlTag>() || clazz.hasAnnotation<XmlTagText>()) {
+                val annotations = clazz.annotations
+                val tagName = annotations.mapNotNull {
+                    when (it) {
+                        is XmlTagText -> it.value
+                        is XmlTag -> it.value
+                        else -> null
+                    }
                 }
-            }
-            if (clazz.hasAnnotation<XmlAdapter>()) {
-                if (doc.findTag(tagName[0]) != null) {
-                    val newTag = doc.findTag(tagName[0])
-                    val xmlAdapterAnnotation = clazz.annotations.filterIsInstance<XmlAdapter>().firstOrNull()
+                val newTag = doc.findTag(tagName.firstOrNull() ?: "")
+                newTag?.let {
+                    val xmlAdapterAnnotation = clazz.findAnnotation<XmlAdapter>()
                     val adapterClass = xmlAdapterAnnotation?.adapterC?.java
                     if (adapterClass != null) {
                         val adapterInstance = adapterClass.getDeclaredConstructor().newInstance() as Adapter
-                        newTag?.let { adapterInstance.adaptValue(it) }
+                        adapterInstance.adaptValue(it)
+                    }
+                }
+            }
+        } else {
+            clazz.memberProperties.forEach { property ->
+                val propertyValue = property.getter.call(actualTag)
+                if (property.hasAnnotation<XmlAdapter>()) {
+                    processChanges(propertyValue!!, doc)
+                } else if (property.hasAnnotation<HasTagChildren>()) {
+                    if (property.returnType.classifier.let { it is KClass<*> && it.isSubclassOf(Iterable::class) }) {
+                        val items = propertyValue as? Iterable<*>
+                        items!!.firstOrNull()?.let { processChanges(it, doc) }
+                    } else if (property.returnType.classifier.let { it is KClass<*> }) {
+                        if (propertyValue != null) {
+                            processChanges(propertyValue, doc)
+                        }
                     }
                 }
             }
         }
-        else {
-
-        }
-        return writeInDoc()
+        val fileName = doc.getDocName()
+        doc.writeToFile(fileName)
+        return File(fileName).readText()
     }
 
 
@@ -434,4 +450,6 @@ class Mapping {
             else -> value.toString()
         }
     }
+
+
 }

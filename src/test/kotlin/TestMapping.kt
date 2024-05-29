@@ -344,7 +344,16 @@ internal class TestMapping {
 
         class TestAdapter: Adapter{
             override fun adaptValue(tag: Tag) {
-                tag.addAttribute("codigo", "1234")
+                val atrs = tag.getAttributes().toMutableList()
+                if (atrs.size > 1) {
+                    val temp1 = atrs[0]
+                    val temp2 = atrs[1]
+
+                    tag.removeAttribute(temp1.name)
+                    tag.removeAttribute(temp2.name)
+                    tag.addAttribute(temp2.name, temp2.value)
+                    tag.addAttribute(temp1.name, temp1.value)
+                }
             }
         }
 
@@ -368,11 +377,10 @@ internal class TestMapping {
 
             @Mapping.XmlTag("avaliacao")
             @Mapping.HasTagChildren
-            val avaliacao: List<ComponenteAvaliacao>
+            val avaliacao: ComponenteAvaliacao
         )
 
-        val f = FUC("Programação Avançada", 6.0, listOf(ComponenteAvaliacao("Quizzes", 20),
-            ComponenteAvaliacao("Testes", 80)))
+        val f = FUC("Programação Avançada", 6.0, ComponenteAvaliacao("Quizzes", 20))
         map.createClass(f, null, doc)
 
         val expectedAdaptedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -380,14 +388,13 @@ internal class TestMapping {
                 "\t<nome>Programação Avançada</nome>\n" +
                 "\t<ects>6.0</ects>\n" +
                 "\t<avaliacao>\n" +
-                "\t\t<componente nome=\"Quizzes\" peso=\"20%\" codigo=\"1234\"/>\n" +
-                "\t\t<componente nome=\"Testes\" peso=\"80%\" codigo=\"1234\"/>\n" +
+                "\t\t<componente peso=\"20\" nome=\"Quizzes\"/>\n" +
                 "\t</avaliacao>\n" +
                 "</fuc>"
 
 
         val adaptedTag = map.processChanges(f, doc)
-        //assertEquals(expectedAdaptedXml, adaptedTag)
+        assertEquals(expectedAdaptedXml, adaptedTag)
     }
 
 }
